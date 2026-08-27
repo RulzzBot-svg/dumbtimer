@@ -231,12 +231,15 @@ export default function App() {
       })
     }
 
+    if (alarm.gif?.url) {
+      setMedia(alarm.gif)
+      setLoadingGif(false)
+      maybeNotify(alarm, alarm.gif, activeCopy)
+      return
+    }
+
     try {
-      const nextMedia = await fetchAlarmGif(
-        alarm.query,
-        giphyKeyRef.current,
-        alarm.gif,
-      )
+      const nextMedia = await fetchAlarmGif(alarm.query, giphyKeyRef.current)
       setMedia(nextMedia)
       maybeNotify(alarm, nextMedia, activeCopy)
     } catch (error) {

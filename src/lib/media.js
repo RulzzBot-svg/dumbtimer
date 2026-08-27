@@ -14,20 +14,17 @@ function pick(items) {
 
 function mapGiphyGif(gif, query) {
   const images = gif.images ?? {}
+  const stableUrl = gif.id ? `https://i.giphy.com/${gif.id}.gif` : null
   const url =
+    stableUrl ||
     images.downsized?.url ||
     images.original?.url ||
     images.fixed_height?.url
-  const previewUrl =
-    images.fixed_width_small?.url ||
-    images.preview_gif?.url ||
-    images.fixed_height_small?.url ||
-    url
   if (!url) return null
   return {
     id: gif.id,
     url,
-    previewUrl,
+    previewUrl: url,
     pageUrl: gif.url || 'https://giphy.com',
     title: gif.title || query,
     source: 'giphy',
@@ -108,8 +105,7 @@ export async function searchGifs(rawQuery, giphyKey) {
   return [FALLBACK_CAT]
 }
 
-export async function fetchAlarmGif(rawQuery, giphyKey, savedGif) {
-  if (savedGif?.url) return savedGif
+export async function fetchAlarmGif(rawQuery, giphyKey) {
   const results = await searchGifs(rawQuery, giphyKey)
   return pick(results) || FALLBACK_CAT
 }
