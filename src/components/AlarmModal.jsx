@@ -1,4 +1,5 @@
 export function AlarmModal({
+  copy,
   alarm,
   media,
   loading,
@@ -9,26 +10,26 @@ export function AlarmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="alarm-title"
     >
-      <div className="flex max-h-[92svh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-cream/15 bg-ink-2 shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+      <div className="flex max-h-[92svh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-line bg-card shadow-[0_30px_80px_rgba(0,0,0,0.28)]">
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <p className="text-xs font-semibold tracking-[0.28em] text-amber uppercase">
-              Alarm
+            <p className="text-xs font-semibold tracking-[0.28em] text-accent uppercase">
+              {copy.modalKicker}
             </p>
-            <h2 id="alarm-title" className="mt-1 font-serif text-3xl text-cream">
+            <h2 id="alarm-title" className="mt-1 font-serif text-3xl text-fg">
               {alarm.time}
             </h2>
-            <p className="mt-1 text-sm text-cream-dim">{alarm.query}</p>
+            <p className="mt-1 text-sm text-muted">{alarm.query}</p>
           </div>
           <button
             type="button"
             onClick={onDismiss}
-            className="rounded-full border border-cream/15 px-3 py-1 text-sm text-cream/70 hover:text-cream"
+            className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-fg"
           >
             Close
           </button>
@@ -36,7 +37,7 @@ export function AlarmModal({
 
         <div className="flex min-h-[240px] flex-1 items-center justify-center p-4 sm:p-6">
           {loading ? (
-            <p className="font-serif text-cream-dim italic">Fetching something chill…</p>
+            <p className="font-serif text-muted italic">{copy.loading}</p>
           ) : media?.url ? (
             <img
               src={media.url}
@@ -44,12 +45,12 @@ export function AlarmModal({
               className="max-h-[58svh] w-full rounded-2xl object-contain"
             />
           ) : (
-            <p className="text-cream-dim">Could not load a GIF. The chime still counts.</p>
+            <p className="text-muted">{copy.fallback}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-3 px-6 pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-cream/40">
+          <p className="text-xs text-muted">
             {media?.attribution ? (
               <>
                 {media.attribution}
@@ -60,7 +61,7 @@ export function AlarmModal({
                       href={media.pageUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="underline decoration-cream/20 underline-offset-2 hover:text-cream-dim"
+                      className="underline decoration-line underline-offset-2 hover:text-fg"
                     >
                       source
                     </a>
@@ -68,23 +69,23 @@ export function AlarmModal({
                 ) : null}
               </>
             ) : (
-              'Take a breath, then get up.'
+              copy.dismiss
             )}
           </p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onSnooze}
-              className="rounded-full border border-cream/15 px-4 py-2 text-sm text-cream hover:border-mist/50"
+              className="rounded-full border border-line px-4 py-2 text-sm text-fg hover:border-accent"
             >
-              Snooze 1 min
+              {copy.snooze}
             </button>
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-full bg-cream px-4 py-2 text-sm font-semibold text-ink hover:bg-amber"
+              className="rounded-full bg-fg px-4 py-2 text-sm font-semibold text-bg hover:bg-accent"
             >
-              I&apos;m up
+              {copy.dismiss}
             </button>
           </div>
         </div>

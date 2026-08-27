@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nightstand">
-  <rect width="64" height="64" rx="16" fill="#120e18"/>
-  <circle cx="34" cy="32" r="18" fill="#f4ead8"/>
-  <circle cx="40" cy="28" r="14" fill="#120e18"/>
-  <path d="M18 22 L22 12 L26 22 Z" fill="#f0b86e"/>
-  <path d="M28 20 L33 9 L36 22 Z" fill="#e7a6b6"/>
-  <circle cx="24" cy="34" r="2.2" fill="#f0b86e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Desk">
+  <rect width="64" height="64" rx="16" fill="#f3eee4"/>
+  <circle cx="32" cy="32" r="18" fill="#fffcf6" stroke="#1c1915" stroke-width="3"/>
+  <path d="M32 20 V32 L41 37" fill="none" stroke="#c24e24" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="2.5" fill="#1c1915"/>
 </svg>

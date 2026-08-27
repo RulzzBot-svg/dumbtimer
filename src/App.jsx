@@ -3,8 +3,10 @@ import { AlarmDashboard } from './components/AlarmDashboard.jsx'
 import { AlarmForm } from './components/AlarmForm.jsx'
 import { AlarmModal } from './components/AlarmModal.jsx'
 import { ClockDisplay } from './components/ClockDisplay.jsx'
+import { ModeToggle } from './components/ModeToggle.jsx'
 import { Toast } from './components/Toast.jsx'
 import { playAlarmSound, stopAlarmSound, unlockAudio } from './lib/audio.js'
+import { COPY } from './lib/copy.js'
 import { fetchAlarmGif } from './lib/media.js'
 import {
   addMinutesHHmm,
@@ -16,6 +18,7 @@ import {
 
 const ALARMS_KEY = 'nightstand.alarms.v1'
 const GIPHY_KEY = 'nightstand.giphyKey'
+const MODE_KEY = 'nightstand.mode'
 const envGiphyKey = import.meta.env.VITE_GIPHY_API_KEY || ''
 
 function loadAlarms() {
@@ -35,22 +38,32 @@ function loadGiphyKey() {
   }
 }
 
+function loadMode() {
+  try {
+    const saved = localStorage.getItem(MODE_KEY)
+    if (saved === 'desk' || saved === 'nightstand') return saved
+  } catch {
+    // Use the office default.
+  }
+  return 'desk'
+}
+
 function createAlarm(time, query) {
   return {
     id: crypto.randomUUID(),
     time,
-    query: query.trim() || 'cute cats',
+    query: query.trim() || 'time to leave work',
     createdAt: new Date().toISOString(),
     lastFiredDate: null,
   }
 }
 
-function maybeNotify(alarm, media) {
+function maybeNotify(alarm, media, copy) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
     return
   }
   try {
-    new Notification(`Nightstand · ${alarm.time}`, {
+    new Notification(copy.notifyTitle(alarm.time), {
       body: alarm.query,
       icon: media?.url,
     })
@@ -84,7 +97,7 @@ function Starfield() {
       {STARS.map(([left, top], index) => (
         <span
           key={`${left}-${top}`}
-          className="absolute h-0.5 w-0.5 rounded-full bg-cream"
+          className="absolute h-0.5 w-0.5 rounded-full bg-fg"
           style={{
             left: `${left}%`,
             top: `${top}%`,
@@ -98,9 +111,10 @@ function Starfield() {
 
 export default function App() {
   const [now, setNow] = useState(() => new Date())
+  const [mode, setMode] = useState(loadMode)
   const [alarms, setAlarms] = useState(loadAlarms)
   const [time, setTime] = useState(() => plusMinutesFromNow(1))
-  const [query, setQuery] = useState('cute cats')
+  const [query, setQuery] = useState('time to leave work')
   const [giphyKey, setGiphyKey] = useState(loadGiphyKey)
   const [showKey, setShowKey] = useState(false)
   const [isRinging, setIsRinging] = useState(false)
@@ -109,19 +123,30 @@ export default function App() {
   const [loadingGif, setLoadingGif] = useState(false)
   const [toast, setToast] = useState('')
 
+  const copy = COPY[mode]
   const alarmsRef = useRef(alarms)
   const ringingRef = useRef(false)
   const giphyKeyRef = useRef(giphyKey)
+  const modeRef = useRef(mode)
   const skippedMinuteRef = useRef(new Map())
   const dismissRef = useRef(() => {})
 
   alarmsRef.current = alarms
   ringingRef.current = isRinging
   giphyKeyRef.current = giphyKey
+  modeRef.current = mode
 
   function minuteStamp(date) {
     return `${formatDateKey(date)}:${formatHHmm(date)}`
   }
+
+  useEffect(() => {
+    document.documentElement.dataset.mode = mode
+    const theme = mode === 'nightstand' ? '#120e18' : '#f3eee4'
+    const themeMeta = document.querySelector('meta[name="theme-color"]')
+    if (themeMeta) themeMeta.setAttribute('content', theme)
+    localStorage.setItem(MODE_KEY, mode)
+  }, [mode])
 
   useEffect(() => {
     localStorage.setItem(ALARMS_KEY, JSON.stringify(alarms))
@@ -176,13 +201,14 @@ export default function App() {
   }, [isRinging])
 
   async function fireAlarm(alarm, { persist }) {
+    const activeCopy = COPY[modeRef.current]
     ringingRef.current = true
     setIsRinging(true)
     setActiveAlarm(alarm)
     setMedia(null)
     setLoadingGif(true)
-    playAlarmSound()
-    setToast(`Alarm for ${alarm.time} · ${alarm.query}`)
+    playAlarmSound({ loop: modeRef.current === 'nightstand' })
+    setToast(activeCopy.toastFired(alarm.time, alarm.query))
 
     if (persist) {
       const today = formatDateKey(new Date())
@@ -196,10 +222,10 @@ export default function App() {
     try {
       const nextMedia = await fetchAlarmGif(alarm.query, giphyKeyRef.current)
       setMedia(nextMedia)
-      maybeNotify(alarm, nextMedia)
+      maybeNotify(alarm, nextMedia, activeCopy)
     } catch (error) {
       console.warn(error)
-      setToast('Alarm fired, but the GIF request missed.')
+      setToast('Ping fired, but the GIF request missed.')
     } finally {
       setLoadingGif(false)
     }
@@ -249,18 +275,30 @@ export default function App() {
     setAlarms((current) =>
       [...current, alarm].sort((left, right) => left.time.localeCompare(right.time)),
     )
-    setToast(`Saved ${alarm.time} · ${alarm.query}`)
+    setToast(copy.toastSaved(alarm.time, alarm.query))
   }
 
   return (
-    <div className="relative min-h-svh overflow-hidden bg-ink">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(240,184,110,0.16),_transparent_42%),radial-gradient(ellipse_at_bottom,_rgba(154,208,194,0.08),_transparent_46%)]" />
-      <Starfield />
+    <div className="relative min-h-svh overflow-hidden bg-bg text-fg">
+      {mode === 'nightstand' ? (
+        <>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(240,184,110,0.16),_transparent_42%),radial-gradient(ellipse_at_bottom,_rgba(154,208,194,0.08),_transparent_46%)]" />
+          <Starfield />
+        </>
+      ) : (
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(194,78,36,0.08),_transparent_40%)]" />
+      )}
 
       <main className="relative mx-auto flex min-h-svh max-w-2xl flex-col gap-10 px-5 py-10 sm:py-16">
-        <ClockDisplay now={now} />
+        <div className="flex justify-center">
+          <ModeToggle mode={mode} onChange={setMode} />
+        </div>
+
+        <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
 
         <AlarmForm
+          mode={mode}
+          copy={copy}
           time={time}
           query={query}
           onTimeChange={setTime}
@@ -269,6 +307,7 @@ export default function App() {
         />
 
         <AlarmDashboard
+          copy={copy}
           alarms={alarms}
           onDelete={(id) =>
             setAlarms((current) => current.filter((alarm) => alarm.id !== id))
@@ -279,28 +318,28 @@ export default function App() {
           }}
         />
 
-        <section className="mt-auto rounded-3xl border border-cream/8 bg-ink-2/40 p-4 text-sm text-cream-dim">
+        <section className="mt-auto rounded-3xl border border-line bg-card/70 p-4 text-sm text-muted">
           <button
             type="button"
             onClick={() => setShowKey((value) => !value)}
-            className="flex w-full items-center justify-between text-left text-cream"
+            className="flex w-full items-center justify-between text-left text-fg"
           >
-            <span>Giphy API key</span>
-            <span className="text-xs text-cream/40">
-              {giphyKey ? 'saved locally' : 'optional'}
+            <span>Giphy</span>
+            <span className="text-xs text-muted">
+              {giphyKey ? 'connected' : 'optional'}
             </span>
           </button>
           {showKey ? (
             <div className="mt-3 space-y-2">
               <p>
-                Giphy requires a client key for meme searches like “Dark Souls You
-                Died”. Without one, Nightstand still wakes you with Wikimedia cat
-                GIFs. Get a free key from{' '}
+                A Giphy dashboard key (SDK or API — same thing) unlocks search for
+                pings like “time to leave work”. Without one, Wikimedia GIFs still
+                show. Manage keys at{' '}
                 <a
                   href="https://developers.giphy.com/dashboard/"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-amber underline decoration-amber/30 underline-offset-2"
+                  className="text-accent underline decoration-accent/30 underline-offset-2"
                 >
                   developers.giphy.com
                 </a>
@@ -312,7 +351,7 @@ export default function App() {
                 value={giphyKey}
                 onChange={(event) => setGiphyKey(event.target.value.trim())}
                 placeholder="Paste Giphy API key"
-                className="h-11 w-full rounded-2xl border border-cream/10 bg-ink-3 px-3 font-mono text-sm text-cream outline-none focus:border-amber/50"
+                className="h-11 w-full rounded-2xl border border-line bg-bg px-3 font-mono text-sm text-fg outline-none focus:border-accent"
               />
             </div>
           ) : null}
@@ -321,6 +360,7 @@ export default function App() {
 
       {isRinging ? (
         <AlarmModal
+          copy={copy}
           alarm={activeAlarm}
           media={media}
           loading={loadingGif}

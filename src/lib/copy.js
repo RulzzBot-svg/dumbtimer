@@ -1,0 +1,41 @@
+export const COPY = {
+  desk: {
+    kicker: 'Desk',
+    formTitle: 'Set a ping',
+    formHint: 'A GIF nudge for lunch, a meeting, or time to leave — not a 5am wake-up.',
+    listTitle: "Today's pings",
+    empty: 'Nothing on the board. Set a reminder for lunch, wrap-up, or heading out.',
+    saveLabel: 'Save ping',
+    modalKicker: 'Ping',
+    dismiss: 'Got it',
+    snooze: 'Snooze 1 min',
+    loading: 'Grabbing a GIF…',
+    fallback: 'Could not load a GIF. The ping still counts.',
+    toastSaved: (time, query) => `Saved ${time} · ${query}`,
+    toastFired: (time, query) => `Ping · ${time} · ${query}`,
+    notifyTitle: (time) => `Desk · ${time}`,
+  },
+  nightstand: {
+    kicker: 'Nightstand',
+    formTitle: 'Set an alarm',
+    formHint: 'Pick a time and a GIF mood for later. Cute cats still welcome.',
+    listTitle: "Tonight's alarms",
+    empty: 'Nothing scheduled yet. Set a time, add a GIF search, and go drift off.',
+    saveLabel: 'Save alarm',
+    modalKicker: 'Alarm',
+    dismiss: "I'm up",
+    snooze: 'Snooze 1 min',
+    loading: 'Fetching something chill…',
+    fallback: 'Could not load a GIF. The chime still counts.',
+    toastSaved: (time, query) => `Saved ${time} · ${query}`,
+    toastFired: (time, query) => `Alarm for ${time} · ${query}`,
+    notifyTitle: (time) => `Nightstand · ${time}`,
+  },
+}
+
+export const DESK_PRESETS = [
+  { label: 'Time to leave', query: 'time to leave work', time: '17:00' },
+  { label: 'Lunch', query: 'lunch time', time: '12:00' },
+  { label: 'Wrap up', query: 'wrap it up' },
+  { label: 'Meeting', query: 'lets go' },
+]

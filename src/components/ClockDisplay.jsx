@@ -1,4 +1,4 @@
-export function ClockDisplay({ now }) {
+export function ClockDisplay({ now, mode, kicker }) {
   const hours = String(now.getHours()).padStart(2, '0')
   const minutes = String(now.getMinutes()).padStart(2, '0')
   const seconds = String(now.getSeconds()).padStart(2, '0')
@@ -7,33 +7,44 @@ export function ClockDisplay({ now }) {
     month: 'long',
     day: 'numeric',
   })
+  const nightstand = mode === 'nightstand'
 
   return (
     <section className="text-center">
-      <p className="mb-3 text-[0.7rem] font-semibold tracking-[0.42em] text-amber/80 uppercase">
-        Nightstand
+      <p
+        className={`mb-3 text-[0.7rem] font-semibold tracking-[0.42em] uppercase ${
+          nightstand ? 'text-accent/80' : 'text-muted'
+        }`}
+      >
+        {kicker}
       </p>
       <div className="relative mx-auto inline-block">
-        <div
-          className="pointer-events-none absolute inset-x-6 -inset-y-4 rounded-full bg-amber/20 blur-3xl"
-          style={{ animation: 'glow-pulse 5s ease-in-out infinite' }}
-        />
+        {nightstand ? (
+          <div
+            className="pointer-events-none absolute inset-x-6 -inset-y-4 rounded-full bg-accent/20 blur-3xl"
+            style={{ animation: 'glow-pulse 5s ease-in-out infinite' }}
+          />
+        ) : null}
         <time
           dateTime={now.toISOString()}
-          className="relative font-mono text-[14vw] leading-none font-medium tracking-tight text-cream tabular-nums sm:text-8xl md:text-9xl"
-          style={{
-            textShadow: '0 0 28px rgba(240, 184, 110, 0.35)',
-          }}
+          className="relative font-mono text-[14vw] leading-none font-medium tracking-tight text-fg tabular-nums sm:text-8xl md:text-9xl"
+          style={
+            nightstand
+              ? { textShadow: '0 0 28px rgba(240, 184, 110, 0.35)' }
+              : undefined
+          }
         >
           {hours}
-          <span className="text-amber/80">:</span>
+          <span className="text-accent">:</span>
           {minutes}
-          <span className="ml-2 align-top font-sans text-[0.28em] tracking-[0.2em] text-cream-dim">
+          <span className="ml-2 align-top font-sans text-[0.28em] tracking-[0.2em] text-muted">
             {seconds}
           </span>
         </time>
       </div>
-      <p className="mt-4 font-serif text-lg text-cream-dim italic">{weekday}</p>
+      <p className={`mt-4 text-lg text-muted ${nightstand ? 'font-serif italic' : ''}`}>
+        {weekday}
+      </p>
     </section>
   )
 }

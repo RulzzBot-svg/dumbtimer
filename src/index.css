@@ -4,14 +4,35 @@
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --color-ink: #120e18;
-  --color-ink-2: #1c1626;
-  --color-ink-3: #261e33;
-  --color-cream: #f4ead8;
-  --color-cream-dim: #d9cbb3;
-  --color-amber: #f0b86e;
-  --color-blush: #e7a6b6;
-  --color-mist: #9ad0c2;
+  --color-bg: var(--app-bg);
+  --color-fg: var(--app-fg);
+  --color-card: var(--app-card);
+  --color-muted: var(--app-muted);
+  --color-line: var(--app-line);
+  --color-accent: var(--app-accent);
+  --color-overlay: var(--app-overlay);
+}
+
+html[data-mode="desk"] {
+  --app-bg: #f3eee4;
+  --app-fg: #1c1915;
+  --app-card: #fffcf6;
+  --app-muted: #6f675c;
+  --app-line: rgba(28, 25, 21, 0.12);
+  --app-accent: #c24e24;
+  --app-overlay: rgba(28, 25, 21, 0.42);
+  color-scheme: light;
+}
+
+html[data-mode="nightstand"] {
+  --app-bg: #120e18;
+  --app-fg: #f4ead8;
+  --app-card: #1c1626;
+  --app-muted: #d9cbb3;
+  --app-line: rgba(244, 234, 216, 0.12);
+  --app-accent: #f0b86e;
+  --app-overlay: rgba(18, 14, 24, 0.8);
+  color-scheme: dark;
 }
 
 html,
@@ -23,8 +44,8 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: #120e18;
-  color: var(--color-cream);
+  background: var(--app-bg);
+  color: var(--app-fg);
 }
 
 #root {
@@ -37,8 +58,12 @@ body {
   display: block;
 }
 
-input[type="time"]::-webkit-calendar-picker-indicator {
+html[data-mode="nightstand"] input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(0.9) sepia(0.4) saturate(2) hue-rotate(330deg);
+  cursor: pointer;
+}
+
+html[data-mode="desk"] input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 

@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-mode="desk">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#120e18" />
+    <meta name="theme-color" content="#f3eee4" />
     <meta
       name="description"
-      content="A chill alarm clock that wakes you with GIFs, cute cats, and a soft chime."
+      content="Office GIF reminders for lunch, meetings, and time to leave — with a Nightstand mode for later."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,7 +15,17 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <title>Nightstand — chill GIF alarm clock</title>
+    <title>Desk — GIF reminders</title>
+    <script>
+      try {
+        const mode = localStorage.getItem('nightstand.mode')
+        if (mode === 'desk' || mode === 'nightstand') {
+          document.documentElement.dataset.mode = mode
+        }
+      } catch (error) {
+        // Keep the HTML default.
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

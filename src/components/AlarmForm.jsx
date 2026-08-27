@@ -1,29 +1,30 @@
+import { DESK_PRESETS } from '../lib/copy.js'
 import { plusMinutesFromNow } from '../lib/time.js'
 
 export function AlarmForm({
+  mode,
+  copy,
   time,
   query,
   onTimeChange,
   onQueryChange,
   onSubmit,
 }) {
+  const desk = mode === 'desk'
+
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-3xl border border-cream/10 bg-ink-2/80 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-md"
+      className="rounded-3xl border border-line bg-card p-5 shadow-[0_16px_40px_rgba(28,25,21,0.08)]"
     >
-      <div className="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <h2 className="font-serif text-2xl text-cream">Set an alarm</h2>
-          <p className="mt-1 text-sm text-cream-dim">
-            Pick a time and a GIF mood. Cats work even without a Giphy key.
-          </p>
-        </div>
+      <div className="mb-4">
+        <h2 className="font-serif text-2xl text-fg">{copy.formTitle}</h2>
+        <p className="mt-1 text-sm text-muted">{copy.formHint}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[minmax(0,160px)_1fr]">
         <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold tracking-[0.18em] text-cream-dim uppercase">
+          <span className="mb-1.5 block text-xs font-semibold tracking-[0.18em] text-muted uppercase">
             Time
           </span>
           <input
@@ -31,32 +32,51 @@ export function AlarmForm({
             required
             value={time}
             onChange={(event) => onTimeChange(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-cream/10 bg-ink-3 px-3 font-mono text-lg text-cream outline-none focus:border-amber/60"
+            className="h-12 w-full rounded-2xl border border-line bg-bg px-3 font-mono text-lg text-fg outline-none focus:border-accent"
           />
         </label>
         <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold tracking-[0.18em] text-cream-dim uppercase">
+          <span className="mb-1.5 block text-xs font-semibold tracking-[0.18em] text-muted uppercase">
             GIF search
           </span>
           <input
             type="text"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder='cute cats, or "Dark Souls You Died"'
+            placeholder={desk ? 'time to leave work' : 'cute cats'}
             maxLength={80}
-            className="h-12 w-full rounded-2xl border border-cream/10 bg-ink-3 px-4 text-cream outline-none placeholder:text-cream/30 focus:border-blush/70"
+            className="h-12 w-full rounded-2xl border border-line bg-bg px-4 text-fg outline-none placeholder:text-muted/50 focus:border-accent"
           />
         </label>
       </div>
 
+      {desk ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted">Moods</span>
+          {DESK_PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => {
+                onQueryChange(preset.query)
+                if (preset.time) onTimeChange(preset.time)
+              }}
+              className="rounded-full border border-line px-3 py-1 text-xs text-muted transition hover:border-accent hover:text-accent"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-cream/40">Quick set</span>
+        <span className="text-xs text-muted">Quick set</span>
         {[1, 5, 10].map((minutes) => (
           <button
             key={minutes}
             type="button"
             onClick={() => onTimeChange(plusMinutesFromNow(minutes))}
-            className="rounded-full border border-cream/10 px-3 py-1 text-xs text-cream-dim transition hover:border-amber/50 hover:text-amber"
+            className="rounded-full border border-line px-3 py-1 text-xs text-muted transition hover:border-accent hover:text-accent"
           >
             +{minutes} min
           </button>
@@ -65,10 +85,9 @@ export function AlarmForm({
 
       <button
         type="submit"
-        className="mt-5 h-12 w-full rounded-2xl font-semibold text-ink shadow-[0_10px_30px_rgba(240,184,110,0.25)] transition hover:brightness-110"
-        style={{ background: 'linear-gradient(90deg, #f0b86e, #e7a6b6)' }}
+        className="mt-5 h-12 w-full rounded-2xl bg-fg font-semibold text-bg transition hover:bg-accent"
       >
-        Save alarm
+        {copy.saveLabel}
       </button>
     </form>
   )

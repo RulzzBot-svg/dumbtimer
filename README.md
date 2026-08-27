@@ -1,8 +1,10 @@
-# Nightstand
+# Desk (with Nightstand mode)
 
-A lightweight GIF alarm clock. Set a time, pick a search term like `cute cats` or `Dark Souls You Died`, and get a full-screen GIF plus a soft chime when it hits.
+Office GIF reminders. Set a time, pick a search like `time to leave work` or `lunch time`, and get a GIF ping when it hits. Switch to **Nightstand** when you actually want the dark, late-night alarm vibe.
 
-Alarms live in `localStorage`, so a closed tab or refresh does not wipe the night's schedule.
+Alarms live in `localStorage`, so a refresh does not wipe the day's pings.
+
+A Giphy dashboard key (SDK or API — they are the same key) is already wired via `VITE_GIPHY_API_KEY`. Giphy's JS SDK and the REST Search endpoint both use that dashboard key. You do not need a second "simple API key."
 
 ## Run locally
 
@@ -11,30 +13,19 @@ npm install
 npm run dev
 ```
 
-Open the printed localhost URL. The clock ticks from `Date()`, and a `setInterval` loop compares the current `HH:mm` against saved alarms every 1,000ms.
+## Deploy on Vercel
 
-## GIF sources
+This is a Vite app. The fastest path if you already have a Vercel account:
 
-The alarm modal fetches from the [Giphy Search API](https://developers.giphy.com/docs/api/endpoint#search) when a key is available:
+1. Import this GitHub repo at [vercel.com/new](https://vercel.com/new)
+2. Framework preset: **Vite** (auto-detected)
+3. Build command: `npm run build`
+4. Output directory: `dist`
 
-1. Paste a key in the **Giphy API key** panel on the page, or
-2. Set `VITE_GIPHY_API_KEY` in a `.env` file (see `.env.example`).
-
-Giphy keys are free from [developers.giphy.com](https://developers.giphy.com/dashboard/). Without a key, Nightstand still rings and falls back to Wikimedia Commons cat GIFs so the wake-up overlay always has something chill to show.
-
-## Build and deploy
+Or from a laptop that is logged into Vercel:
 
 ```bash
-npm run build
+npx vercel --prod
 ```
 
-Static files land in `dist/`. Deploy that folder to Cloudflare Pages:
-
-```bash
-npx wrangler pages deploy dist --project-name=dumb-timer
-```
-
-Or connect this GitHub repo to [Cloudflare Pages](https://pages.cloudflare.com/) with:
-
-- Build command: `npm run build`
-- Output directory: `dist`
+`vercel.json` already sets the Vite framework and an SPA rewrite.

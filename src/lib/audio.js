@@ -9,9 +9,9 @@ function getChime() {
   return chime
 }
 
-export function playAlarmSound() {
+export function playAlarmSound({ loop = false } = {}) {
   const audio = getChime()
-  audio.loop = true
+  audio.loop = loop
   audio.currentTime = 0
   return audio.play().catch(() => {
     // Autoplay can still be blocked if the tab never received a gesture.
