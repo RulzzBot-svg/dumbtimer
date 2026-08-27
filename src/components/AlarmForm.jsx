@@ -1,13 +1,19 @@
 import { DESK_PRESETS } from '../lib/copy.js'
 import { plusMinutesFromNow } from '../lib/time.js'
+import { GifPicker } from './GifPicker.jsx'
 
 export function AlarmForm({
   mode,
   copy,
   time,
   query,
+  giphyKey,
+  selectedGif,
+  repeat,
   onTimeChange,
   onQueryChange,
+  onGifChange,
+  onRepeatChange,
   onSubmit,
 }) {
   const desk = mode === 'desk'
@@ -42,7 +48,13 @@ export function AlarmForm({
           <input
             type="text"
             value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
+            onChange={(event) => {
+              onQueryChange(event.target.value)
+              onGifChange(null)
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') event.preventDefault()
+            }}
             placeholder={desk ? 'time to leave work' : 'cute cats'}
             maxLength={80}
             className="h-12 w-full rounded-2xl border border-line bg-bg px-4 text-fg outline-none placeholder:text-muted/50 focus:border-accent"
@@ -59,6 +71,7 @@ export function AlarmForm({
               type="button"
               onClick={() => {
                 onQueryChange(preset.query)
+                onGifChange(null)
                 if (preset.time) onTimeChange(preset.time)
               }}
               className="rounded-full border border-line px-3 py-1 text-xs text-muted transition hover:border-accent hover:text-accent"
@@ -82,6 +95,30 @@ export function AlarmForm({
           </button>
         ))}
       </div>
+
+      <GifPicker
+        query={query}
+        giphyKey={giphyKey}
+        selected={selectedGif}
+        onSelect={onGifChange}
+      />
+
+      <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-line bg-bg px-4 py-3">
+        <span>
+          <span className="block font-medium text-fg">Every day</span>
+          <span className="block text-xs text-muted">
+            Same time, every day. Turn off for a one-time ping.
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={repeat === 'daily'}
+          onChange={(event) =>
+            onRepeatChange(event.target.checked ? 'daily' : 'once')
+          }
+          className="h-5 w-5 accent-current"
+        />
+      </label>
 
       <button
         type="submit"

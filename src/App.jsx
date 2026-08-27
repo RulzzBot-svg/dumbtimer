@@ -24,7 +24,12 @@ const envGiphyKey = import.meta.env.VITE_GIPHY_API_KEY || ''
 function loadAlarms() {
   try {
     const parsed = JSON.parse(localStorage.getItem(ALARMS_KEY) || '[]')
-    return Array.isArray(parsed) ? parsed : []
+    if (!Array.isArray(parsed)) return []
+    return parsed.map((alarm) => ({
+      ...alarm,
+      repeat: alarm.repeat === 'once' ? 'once' : 'daily',
+      gif: alarm.gif || null,
+    }))
   } catch {
     return []
   }
@@ -48,11 +53,13 @@ function loadMode() {
   return 'desk'
 }
 
-function createAlarm(time, query) {
+function createAlarm(time, query, { gif, repeat }) {
   return {
     id: crypto.randomUUID(),
     time,
     query: query.trim() || 'time to leave work',
+    gif: gif || null,
+    repeat: repeat === 'once' ? 'once' : 'daily',
     createdAt: new Date().toISOString(),
     lastFiredDate: null,
   }
@@ -115,6 +122,8 @@ export default function App() {
   const [alarms, setAlarms] = useState(loadAlarms)
   const [time, setTime] = useState(() => plusMinutesFromNow(1))
   const [query, setQuery] = useState('time to leave work')
+  const [selectedGif, setSelectedGif] = useState(null)
+  const [repeat, setRepeat] = useState('daily')
   const [giphyKey, setGiphyKey] = useState(loadGiphyKey)
   const [showKey, setShowKey] = useState(false)
   const [isRinging, setIsRinging] = useState(false)
@@ -212,15 +221,22 @@ export default function App() {
 
     if (persist) {
       const today = formatDateKey(new Date())
-      setAlarms((current) =>
-        current.map((item) =>
+      setAlarms((current) => {
+        if (alarm.repeat === 'once') {
+          return current.filter((item) => item.id !== alarm.id)
+        }
+        return current.map((item) =>
           item.id === alarm.id ? { ...item, lastFiredDate: today } : item,
-        ),
-      )
+        )
+      })
     }
 
     try {
-      const nextMedia = await fetchAlarmGif(alarm.query, giphyKeyRef.current)
+      const nextMedia = await fetchAlarmGif(
+        alarm.query,
+        giphyKeyRef.current,
+        alarm.gif,
+      )
       setMedia(nextMedia)
       maybeNotify(alarm, nextMedia, activeCopy)
     } catch (error) {
@@ -248,18 +264,18 @@ export default function App() {
   function snoozeAlarm() {
     if (!activeAlarm) return
     const snoozedTime = addMinutesHHmm(formatHHmm(new Date()), 1)
-    setAlarms((current) =>
-      current.map((item) =>
-        item.id === activeAlarm.id
-          ? {
-              ...item,
-              time: snoozedTime,
-              lastFiredDate: null,
-              createdAt: new Date().toISOString(),
-            }
-          : item,
-      ),
-    )
+    const snoozed = {
+      ...activeAlarm,
+      time: snoozedTime,
+      lastFiredDate: null,
+      createdAt: new Date().toISOString(),
+    }
+    setAlarms((current) => {
+      const without = current.filter((item) => item.id !== activeAlarm.id)
+      return [...without, snoozed].sort((left, right) =>
+        left.time.localeCompare(right.time),
+      )
+    })
     setToast(`Snoozed to ${snoozedTime}`)
     dismissAlarm()
   }
@@ -271,15 +287,16 @@ export default function App() {
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {})
     }
-    const alarm = createAlarm(time, query)
+    const alarm = createAlarm(time, query, { gif: selectedGif, repeat })
     setAlarms((current) =>
       [...current, alarm].sort((left, right) => left.time.localeCompare(right.time)),
     )
     setToast(copy.toastSaved(alarm.time, alarm.query))
+    setSelectedGif(null)
   }
 
   return (
-    <div className="relative min-h-svh overflow-hidden bg-bg text-fg">
+    <div className="relative min-h-svh overflow-x-hidden bg-bg text-fg">
       {mode === 'nightstand' ? (
         <>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(240,184,110,0.16),_transparent_42%),radial-gradient(ellipse_at_bottom,_rgba(154,208,194,0.08),_transparent_46%)]" />
@@ -301,8 +318,13 @@ export default function App() {
           copy={copy}
           time={time}
           query={query}
+          giphyKey={giphyKey}
+          selectedGif={selectedGif}
+          repeat={repeat}
           onTimeChange={setTime}
           onQueryChange={setQuery}
+          onGifChange={setSelectedGif}
+          onRepeatChange={setRepeat}
           onSubmit={handleSubmit}
         />
 

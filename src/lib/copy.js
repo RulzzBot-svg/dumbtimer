@@ -2,7 +2,7 @@ export const COPY = {
   desk: {
     kicker: 'Desk',
     formTitle: 'Set a ping',
-    formHint: 'A GIF nudge for lunch, a meeting, or time to leave — not a 5am wake-up.',
+    formHint: 'Search and pick a GIF, or hit Random. Turn on Every day for lunch and leave-time.',
     listTitle: "Today's pings",
     empty: 'Nothing on the board. Set a reminder for lunch, wrap-up, or heading out.',
     saveLabel: 'Save ping',
@@ -18,7 +18,7 @@ export const COPY = {
   nightstand: {
     kicker: 'Nightstand',
     formTitle: 'Set an alarm',
-    formHint: 'Pick a time and a GIF mood for later. Cute cats still welcome.',
+    formHint: 'Search GIFs, pick one or Random. Every day keeps it on the nightstand.',
     listTitle: "Tonight's alarms",
     empty: 'Nothing scheduled yet. Set a time, add a GIF search, and go drift off.',
     saveLabel: 'Save alarm',
