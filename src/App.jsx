@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { AlarmDashboard } from './components/AlarmDashboard.jsx'
-import { AlarmForm } from './components/AlarmForm.jsx'
-import { AlarmModal } from './components/AlarmModal.jsx'
-import { ClockDisplay } from './components/ClockDisplay.jsx'
-import { ModeToggle } from './components/ModeToggle.jsx'
-import { Toast } from './components/Toast.jsx'
+import { DesktopShell } from './components/DesktopShell.jsx'
+import { PhoneShell } from './components/PhoneShell.jsx'
 import { playAlarmSound, stopAlarmSound, unlockAudio } from './lib/audio.js'
 import { COPY } from './lib/copy.js'
+import { applyDevice, detectDevice } from './lib/device.js'
 import { fetchAlarmGif } from './lib/media.js'
+import { closePingNotification, showPingNotification } from './lib/notify.js'
 import {
   addMinutesHHmm,
   formatDateKey,
@@ -69,57 +67,15 @@ function createAlarm(time, query, { gif, repeat }) {
 }
 
 function maybeNotify(alarm, media, copy) {
-  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
-    return
-  }
-  try {
-    new Notification(copy.notifyTitle(alarm.time), {
-      body: alarm.query,
-      icon: media?.url,
-    })
-  } catch {
-    // Some browsers reject notification options; the modal is the real alarm.
-  }
-}
-
-const STARS = [
-  [8, 12],
-  [18, 28],
-  [27, 9],
-  [41, 18],
-  [55, 8],
-  [68, 22],
-  [79, 11],
-  [91, 19],
-  [12, 48],
-  [33, 62],
-  [61, 44],
-  [84, 57],
-  [6, 78],
-  [48, 82],
-  [73, 74],
-  [94, 86],
-]
-
-function Starfield() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {STARS.map(([left, top], index) => (
-        <span
-          key={`${left}-${top}`}
-          className="absolute h-0.5 w-0.5 rounded-full bg-fg"
-          style={{
-            left: `${left}%`,
-            top: `${top}%`,
-            animation: `star-twinkle ${3 + (index % 4)}s ease-in-out ${index * 0.2}s infinite`,
-          }}
-        />
-      ))}
-    </div>
-  )
+  showPingNotification({
+    title: copy.notifyTitle(alarm.time, alarm.query),
+    body: copy.notifyBody(alarm.time),
+    media,
+  })
 }
 
 export default function App() {
+  const [device] = useState(detectDevice)
   const [now, setNow] = useState(() => new Date())
   const [mode, setMode] = useState(loadMode)
   const [alarms, setAlarms] = useState(loadAlarms)
@@ -153,10 +109,18 @@ export default function App() {
   }
 
   useEffect(() => {
+    applyDevice(device)
+  }, [device])
+
+  useEffect(() => {
     document.documentElement.dataset.mode = mode
     const theme = mode === 'nightstand' ? '#120e18' : '#f3eee4'
     const themeMeta = document.querySelector('meta[name="theme-color"]')
     if (themeMeta) themeMeta.setAttribute('content', theme)
+    const manifestTheme = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+    if (manifestTheme) {
+      manifestTheme.setAttribute('content', mode === 'nightstand' ? 'black-translucent' : 'default')
+    }
     localStorage.setItem(MODE_KEY, mode)
   }, [mode])
 
@@ -257,6 +221,7 @@ export default function App() {
     if (activeAlarm) {
       skippedMinuteRef.current.set(activeAlarm.id, minuteStamp(new Date()))
     }
+    closePingNotification()
     ringingRef.current = false
     stopAlarmSound()
     setIsRinging(false)
@@ -301,103 +266,38 @@ export default function App() {
     setSelectedGif(null)
   }
 
-  return (
-    <div className="relative min-h-svh overflow-x-hidden bg-bg text-fg">
-      {mode === 'nightstand' ? (
-        <>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(240,184,110,0.16),_transparent_42%),radial-gradient(ellipse_at_bottom,_rgba(154,208,194,0.08),_transparent_46%)]" />
-          <Starfield />
-        </>
-      ) : (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(194,78,36,0.08),_transparent_40%)]" />
-      )}
+  const shell = {
+    mode,
+    copy,
+    now,
+    time,
+    query,
+    giphyKey,
+    selectedGif,
+    repeat,
+    showKey,
+    alarms,
+    isRinging,
+    activeAlarm,
+    media,
+    loadingGif,
+    toast,
+    onModeChange: setMode,
+    onTimeChange: setTime,
+    onQueryChange: setQuery,
+    onGifChange: setSelectedGif,
+    onRepeatChange: setRepeat,
+    onSubmit: handleSubmit,
+    onShowKey: () => setShowKey((value) => !value),
+    onGiphyKeyChange: setGiphyKey,
+    onDelete: (id) => setAlarms((current) => current.filter((alarm) => alarm.id !== id)),
+    onPreview: (alarm) => {
+      unlockAudio()
+      fireAlarm(alarm, { persist: false })
+    },
+    onDismiss: dismissAlarm,
+    onSnooze: snoozeAlarm,
+  }
 
-      <main className="relative mx-auto flex min-h-svh max-w-2xl flex-col gap-10 px-5 py-10 sm:py-16">
-        <div className="flex justify-center">
-          <ModeToggle mode={mode} onChange={setMode} />
-        </div>
-
-        <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
-
-        <AlarmForm
-          mode={mode}
-          copy={copy}
-          time={time}
-          query={query}
-          giphyKey={giphyKey}
-          selectedGif={selectedGif}
-          repeat={repeat}
-          onTimeChange={setTime}
-          onQueryChange={setQuery}
-          onGifChange={setSelectedGif}
-          onRepeatChange={setRepeat}
-          onSubmit={handleSubmit}
-        />
-
-        <AlarmDashboard
-          copy={copy}
-          alarms={alarms}
-          onDelete={(id) =>
-            setAlarms((current) => current.filter((alarm) => alarm.id !== id))
-          }
-          onPreview={(alarm) => {
-            unlockAudio()
-            fireAlarm(alarm, { persist: false })
-          }}
-        />
-
-        <section className="mt-auto rounded-3xl border border-line bg-card/70 p-4 text-sm text-muted">
-          <button
-            type="button"
-            onClick={() => setShowKey((value) => !value)}
-            className="flex w-full items-center justify-between text-left text-fg"
-          >
-            <span>Giphy</span>
-            <span className="text-xs text-muted">
-              {giphyKey ? 'connected' : 'optional'}
-            </span>
-          </button>
-          {showKey ? (
-            <div className="mt-3 space-y-2">
-              <p>
-                A Giphy dashboard key (SDK or API — same thing) unlocks search for
-                pings like “time to leave work”. Without one, Wikimedia GIFs still
-                show. Manage keys at{' '}
-                <a
-                  href="https://developers.giphy.com/dashboard/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-accent underline decoration-accent/30 underline-offset-2"
-                >
-                  developers.giphy.com
-                </a>
-                .
-              </p>
-              <input
-                type="password"
-                autoComplete="off"
-                value={giphyKey}
-                onChange={(event) => setGiphyKey(event.target.value.trim())}
-                placeholder="Paste Giphy API key"
-                className="h-11 w-full rounded-2xl border border-line bg-bg px-3 font-mono text-sm text-fg outline-none focus:border-accent"
-              />
-            </div>
-          ) : null}
-        </section>
-      </main>
-
-      {isRinging ? (
-        <AlarmModal
-          copy={copy}
-          alarm={activeAlarm}
-          media={media}
-          loading={loadingGif}
-          onDismiss={dismissAlarm}
-          onSnooze={snoozeAlarm}
-        />
-      ) : null}
-
-      <Toast message={toast} />
-    </div>
-  )
+  return device === 'phone' ? <PhoneShell {...shell} /> : <DesktopShell {...shell} />
 }

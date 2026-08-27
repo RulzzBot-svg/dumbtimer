@@ -13,7 +13,8 @@ export const COPY = {
     fallback: 'Could not load a GIF. The ping still counts.',
     toastSaved: (time, query) => `Saved ${time} · ${query}`,
     toastFired: (time, query) => `Ping · ${time} · ${query}`,
-    notifyTitle: (time) => `Desk · ${time}`,
+    notifyTitle: (_time, query) => query || 'Desk ping',
+    notifyBody: (time) => `Desk · ${time}`,
   },
   nightstand: {
     kicker: 'Nightstand',
@@ -29,7 +30,8 @@ export const COPY = {
     fallback: 'Could not load a GIF. The chime still counts.',
     toastSaved: (time, query) => `Saved ${time} · ${query}`,
     toastFired: (time, query) => `Alarm for ${time} · ${query}`,
-    notifyTitle: (time) => `Nightstand · ${time}`,
+    notifyTitle: (_time, query) => query || 'Nightstand alarm',
+    notifyBody: (time) => `Nightstand · ${time}`,
   },
 }
 
