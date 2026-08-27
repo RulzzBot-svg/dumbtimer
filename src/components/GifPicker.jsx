@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { searchGifs } from '../lib/media.js'
 
 export function GifPicker({ query, giphyKey, selected, onSelect }) {
   const [results, setResults] = useState([])
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
+  const requestId = useRef(0)
 
   async function loadResults() {
     const gifs = await searchGifs(query, giphyKey)
@@ -12,15 +13,52 @@ export function GifPicker({ query, giphyKey, selected, onSelect }) {
     return gifs
   }
 
+  useEffect(() => {
+    if (!query.trim()) return undefined
+    const id = ++requestId.current
+    const timer = window.setTimeout(() => {
+      setStatus('searching')
+      setError('')
+      searchGifs(query, giphyKey)
+        .then((gifs) => {
+          if (id !== requestId.current) return
+          setResults(gifs)
+          setStatus(gifs.length ? 'ready' : 'empty')
+          if (gifs.length === 0) {
+            setError('No GIFs for that phrase. Try “lunch”, “leave work”, or a movie quote.')
+          }
+        })
+        .catch((caught) => {
+          if (id !== requestId.current) return
+          console.warn(caught)
+          setResults([])
+          setStatus('error')
+          setError(
+            giphyKey
+              ? 'Giphy search missed. Try another phrase.'
+              : 'Giphy is not connected, so search cannot run.',
+          )
+        })
+    }, 350)
+    return () => window.clearTimeout(timer)
+  }, [query, giphyKey])
+
   async function handleSearch() {
     setStatus('searching')
     setError('')
     try {
       const gifs = await loadResults()
       setStatus(gifs.length ? 'ready' : 'empty')
+      if (gifs.length === 0) {
+        setError('No GIFs for that phrase. Try “lunch”, “leave work”, or a movie quote.')
+      }
     } catch (caught) {
       console.warn(caught)
-      setError('Search missed. Try another phrase.')
+      setError(
+        giphyKey
+          ? 'Giphy search missed. Try another phrase.'
+          : 'Giphy is not connected, so search cannot run.',
+      )
       setStatus('error')
     }
   }
@@ -32,6 +70,7 @@ export function GifPicker({ query, giphyKey, selected, onSelect }) {
       const gifs = results.length > 0 ? results : await loadResults()
       if (gifs.length === 0) {
         setStatus('empty')
+        setError('No GIFs to randomize. Search a clearer phrase first.')
         return
       }
       const next = gifs[Math.floor(Math.random() * gifs.length)]
@@ -39,7 +78,7 @@ export function GifPicker({ query, giphyKey, selected, onSelect }) {
       setStatus('ready')
     } catch (caught) {
       console.warn(caught)
-      setError('Could not pick a GIF. Try Search first.')
+      setError('Could not pick a GIF. Hit Search first.')
       setStatus('error')
     }
   }
@@ -90,15 +129,14 @@ export function GifPicker({ query, giphyKey, selected, onSelect }) {
         </div>
       ) : (
         <p className="text-xs text-muted">
-          Search and click one, or hit Random for a related surprise. Save without
-          picking and we’ll grab a new related GIF when it fires.
+          Results update as you type. Click one, or hit Random for a related pick.
         </p>
       )}
 
       {error ? <p className="text-sm text-accent">{error}</p> : null}
 
       {results.length > 0 ? (
-        <div className="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
+        <div className="grid max-h-72 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
           {results.map((gif) => {
             const active = (gif.id || gif.url) === selectedId
             return (

@@ -19,7 +19,8 @@ import {
 const ALARMS_KEY = 'nightstand.alarms.v1'
 const GIPHY_KEY = 'nightstand.giphyKey'
 const MODE_KEY = 'nightstand.mode'
-const envGiphyKey = import.meta.env.VITE_GIPHY_API_KEY || ''
+const BUILT_IN_GIPHY_KEY = 'osWBE8w7riCgyADWwV02X47dMqVO2YkY'
+const envGiphyKey = import.meta.env.VITE_GIPHY_API_KEY || BUILT_IN_GIPHY_KEY
 
 function loadAlarms() {
   try {
@@ -37,10 +38,12 @@ function loadAlarms() {
 
 function loadGiphyKey() {
   try {
-    return localStorage.getItem(GIPHY_KEY) || envGiphyKey
+    const saved = localStorage.getItem(GIPHY_KEY)
+    if (saved && saved.length >= 16) return saved
   } catch {
-    return envGiphyKey
+    // Fall through to the build key.
   }
+  return envGiphyKey
 }
 
 function loadMode() {

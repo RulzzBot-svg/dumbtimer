@@ -14,17 +14,23 @@ function pick(items) {
 
 function mapGiphyGif(gif, query) {
   const images = gif.images ?? {}
-  const stableUrl = gif.id ? `https://i.giphy.com/${gif.id}.gif` : null
+  const previewUrl =
+    images.fixed_height_small?.url ||
+    images.fixed_width_small?.url ||
+    images.preview_gif?.url ||
+    images.downsized_small?.url ||
+    images.downsized?.url
   const url =
-    stableUrl ||
-    images.downsized?.url ||
     images.original?.url ||
-    images.fixed_height?.url
-  if (!url) return null
+    images.downsized?.url ||
+    images.fixed_height?.url ||
+    (gif.id ? `https://i.giphy.com/${gif.id}.gif` : null) ||
+    previewUrl
+  if (!url && !previewUrl) return null
   return {
     id: gif.id,
-    url,
-    previewUrl: url,
+    url: url || previewUrl,
+    previewUrl: previewUrl || url,
     pageUrl: gif.url || 'https://giphy.com',
     title: gif.title || query,
     source: 'giphy',
@@ -32,7 +38,7 @@ function mapGiphyGif(gif, query) {
   }
 }
 
-async function fetchGiphySearch(query, apiKey, limit = 16) {
+async function fetchGiphySearch(query, apiKey, { limit = 24, signal } = {}) {
   const params = new URLSearchParams({
     api_key: apiKey,
     q: query,
@@ -42,70 +48,33 @@ async function fetchGiphySearch(query, apiKey, limit = 16) {
   })
   const response = await fetch(
     `https://api.giphy.com/v1/gifs/search?${params.toString()}`,
+    { signal },
   )
   if (!response.ok) {
     throw new Error(`Giphy responded with ${response.status}`)
   }
   const payload = await response.json()
+  if (payload.meta?.status && payload.meta.status !== 200) {
+    throw new Error(payload.meta.msg || 'Giphy search failed')
+  }
   const gifs = Array.isArray(payload.data) ? payload.data : []
   return gifs.map((gif) => mapGiphyGif(gif, query)).filter(Boolean)
 }
 
-async function fetchWikimediaGifs(query, limit = 8) {
-  const params = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    origin: '*',
-    generator: 'search',
-    gsrsearch: `${query} filemime:gif`,
-    gsrnamespace: '6',
-    gsrlimit: String(limit),
-    prop: 'imageinfo',
-    iiprop: 'url|mime|size',
-  })
-  const response = await fetch(
-    `https://commons.wikimedia.org/w/api.php?${params.toString()}`,
-  )
-  if (!response.ok) return []
-  const payload = await response.json()
-  const pages = Object.values(payload.query?.pages ?? {})
-  return pages
-    .map((page) => {
-      const info = page.imageinfo?.[0]
-      if (!info?.url) return null
-      if (info.mime && info.mime !== 'image/gif') return null
-      const url = info.url.split('?')[0]
-      return {
-        id: page.pageid ? String(page.pageid) : url,
-        url,
-        previewUrl: url,
-        pageUrl: page.title
-          ? `https://commons.wikimedia.org/wiki/${encodeURIComponent(page.title)}`
-          : info.descriptionurl,
-        title: (page.title || query).replace(/^File:/, '').replace(/_/g, ' '),
-        source: 'wikimedia',
-        attribution: 'Wikimedia Commons',
-      }
-    })
-    .filter(Boolean)
-}
-
-export async function searchGifs(rawQuery, giphyKey) {
+export async function searchGifs(rawQuery, giphyKey, signal) {
   const query = (rawQuery || '').trim() || 'time to leave work'
-  if (giphyKey) {
-    try {
-      const giphy = await fetchGiphySearch(query, giphyKey)
-      if (giphy.length > 0) return giphy
-    } catch (error) {
-      console.warn('Giphy search failed, using a backup source.', error)
-    }
+  if (!giphyKey) {
+    throw new Error('Missing Giphy key')
   }
-  const wiki = await fetchWikimediaGifs(query)
-  if (wiki.length > 0) return wiki
-  return [FALLBACK_CAT]
+  return fetchGiphySearch(query, giphyKey, { signal })
 }
 
 export async function fetchAlarmGif(rawQuery, giphyKey) {
-  const results = await searchGifs(rawQuery, giphyKey)
-  return pick(results) || FALLBACK_CAT
+  try {
+    const results = await searchGifs(rawQuery, giphyKey)
+    if (results.length > 0) return pick(results)
+  } catch (error) {
+    console.warn('Giphy search failed.', error)
+  }
+  return FALLBACK_CAT
 }

@@ -15,17 +15,12 @@ npm run dev
 
 ## Deploy on Vercel
 
-This is a Vite app. The fastest path if you already have a Vercel account:
+Import this GitHub repo at [vercel.com/new](https://vercel.com/new) and deploy **Production from `main`**.
 
-1. Import this GitHub repo at [vercel.com/new](https://vercel.com/new)
-2. Framework preset: **Vite** (auto-detected)
-3. Build command: `npm run build`
-4. Output directory: `dist`
+- Framework: **Vite**
+- Build command: `npm run build`
+- Output: `dist`
 
-Or from a laptop that is logged into Vercel:
-
-```bash
-npx vercel --prod
-```
+If GIF search looks unrelated or empty, add `VITE_GIPHY_API_KEY` in Vercel → Project → Settings → Environment Variables, then Redeploy. The dashboard SDK key is the same key Search uses.
 
 `vercel.json` already sets the Vite framework and an SPA rewrite.
