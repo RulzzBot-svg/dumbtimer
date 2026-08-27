@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-ink: #120e18;
+  --color-ink-2: #1c1626;
+  --color-ink-3: #261e33;
+  --color-cream: #f4ead8;
+  --color-cream-dim: #d9cbb3;
+  --color-amber: #f0b86e;
+  --color-blush: #e7a6b6;
+  --color-mist: #9ad0c2;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: #120e18;
+  color: var(--color-cream);
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: initial;
+  border: 0;
+  min-height: 100svh;
+  display: block;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.9) sepia(0.4) saturate(2) hue-rotate(330deg);
+  cursor: pointer;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
