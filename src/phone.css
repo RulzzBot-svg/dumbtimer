@@ -1,0 +1,103 @@
+html[data-device="phone"] {
+  height: 100%;
+}
+
+html[data-device="phone"],
+html[data-device="phone"] body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-device="phone"] body,
+html[data-device="phone"] #root {
+  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+html[data-device="phone"] .phone-shell {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+html[data-device="phone"] .phone-main {
+  gap: 1.5rem;
+  padding-top: 0.85rem;
+  padding-bottom: 1.25rem;
+}
+
+html[data-device="phone"] .phone-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: stretch;
+  padding-top: 0.15rem;
+  padding-bottom: 0.35rem;
+  background: linear-gradient(
+    to bottom,
+    var(--app-bg) 70%,
+    color-mix(in srgb, var(--app-bg) 0%, transparent)
+  );
+}
+
+html[data-device="phone"] .phone-header [role='tablist'] {
+  display: flex;
+  width: 100%;
+}
+
+html[data-device="phone"] .phone-header [role='tab'] {
+  flex: 1;
+  min-height: 44px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+html[data-device="phone"] .phone-shell time {
+  font-size: min(22vw, 5.75rem) !important;
+}
+
+html[data-device="phone"] .phone-keep-open {
+  margin-top: -0.35rem;
+}
+
+html[data-device="phone"] .phone-shell input[type='time'],
+html[data-device="phone"] .phone-shell input[type='text'],
+html[data-device="phone"] .phone-shell input[type='password'] {
+  font-size: 16px;
+  min-height: 48px;
+}
+
+html[data-device="phone"] .phone-shell form button[type='submit'] {
+  min-height: 52px;
+}
+
+html[data-device="phone"] .phone-shell [role='dialog'] {
+  padding: 0;
+  align-items: stretch;
+}
+
+html[data-device="phone"] .phone-shell [role='dialog'] > div {
+  max-width: none;
+  max-height: none;
+  height: 100dvh;
+  height: 100svh;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+html[data-device="phone"] .phone-shell [role='dialog'] img {
+  max-height: 52svh;
+}
+
+html[data-device="phone"] .phone-shell [role='status'] {
+  right: 1rem;
+  left: 1rem;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  max-width: none;
+}
+
+html[data-device="phone"] .phone-shell form .grid.max-h-72 {
+  max-height: 38vh;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
