@@ -8,6 +8,7 @@ import { Toast } from './components/Toast.jsx'
 import { playAlarmSound, stopAlarmSound, unlockAudio } from './lib/audio.js'
 import { COPY } from './lib/copy.js'
 import { fetchAlarmGif } from './lib/media.js'
+import { closePingNotification, showPingNotification } from './lib/notify.js'
 import {
   addMinutesHHmm,
   formatDateKey,
@@ -69,17 +70,11 @@ function createAlarm(time, query, { gif, repeat }) {
 }
 
 function maybeNotify(alarm, media, copy) {
-  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
-    return
-  }
-  try {
-    new Notification(copy.notifyTitle(alarm.time), {
-      body: alarm.query,
-      icon: media?.url,
-    })
-  } catch {
-    // Some browsers reject notification options; the modal is the real alarm.
-  }
+  showPingNotification({
+    title: copy.notifyTitle(alarm.time, alarm.query),
+    body: copy.notifyBody(alarm.time),
+    media,
+  })
 }
 
 const STARS = [
@@ -257,6 +252,7 @@ export default function App() {
     if (activeAlarm) {
       skippedMinuteRef.current.set(activeAlarm.id, minuteStamp(new Date()))
     }
+    closePingNotification()
     ringingRef.current = false
     stopAlarmSound()
     setIsRinging(false)

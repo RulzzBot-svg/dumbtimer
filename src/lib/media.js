@@ -2,6 +2,7 @@ const FALLBACK_CAT = {
   id: 'fallback-maxwell',
   url: 'https://upload.wikimedia.org/wikipedia/commons/2/29/Maxwell-cat.gif',
   previewUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/29/Maxwell-cat.gif',
+  stillUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/29/Maxwell-cat.gif',
   pageUrl: 'https://commons.wikimedia.org/wiki/File:Maxwell-cat.gif',
   title: 'Maxwell the cat',
   source: 'fallback',
@@ -20,6 +21,11 @@ function mapGiphyGif(gif, query) {
     images.preview_gif?.url ||
     images.downsized_small?.url ||
     images.downsized?.url
+  const stillUrl =
+    images.original_still?.url ||
+    images.downsized_still?.url ||
+    images.fixed_height_still?.url ||
+    images.fixed_height_small_still?.url
   const url =
     images.original?.url ||
     images.downsized?.url ||
@@ -31,6 +37,7 @@ function mapGiphyGif(gif, query) {
     id: gif.id,
     url: url || previewUrl,
     previewUrl: previewUrl || url,
+    stillUrl: stillUrl || previewUrl || url,
     pageUrl: gif.url || 'https://giphy.com',
     title: gif.title || query,
     source: 'giphy',
