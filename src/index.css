@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-bg: var(--app-bg);
+  --color-fg: var(--app-fg);
+  --color-card: var(--app-card);
+  --color-muted: var(--app-muted);
+  --color-line: var(--app-line);
+  --color-accent: var(--app-accent);
+  --color-overlay: var(--app-overlay);
+}
+
+html[data-mode="desk"] {
+  --app-bg: #f3eee4;
+  --app-fg: #1c1915;
+  --app-card: #fffcf6;
+  --app-muted: #6f675c;
+  --app-line: rgba(28, 25, 21, 0.12);
+  --app-accent: #c24e24;
+  --app-overlay: rgba(28, 25, 21, 0.42);
+  color-scheme: light;
+}
+
+html[data-mode="nightstand"] {
+  --app-bg: #120e18;
+  --app-fg: #f4ead8;
+  --app-card: #1c1626;
+  --app-muted: #d9cbb3;
+  --app-line: rgba(244, 234, 216, 0.12);
+  --app-accent: #f0b86e;
+  --app-overlay: rgba(18, 14, 24, 0.8);
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--app-bg);
+  color: var(--app-fg);
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: initial;
+  border: 0;
+  min-height: 100svh;
+  display: block;
+}
+
+html[data-mode="nightstand"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.9) sepia(0.4) saturate(2) hue-rotate(330deg);
+  cursor: pointer;
+}
+
+html[data-mode="desk"] input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
