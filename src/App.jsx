@@ -112,10 +112,16 @@ export default function App() {
   const alarmsRef = useRef(alarms)
   const ringingRef = useRef(false)
   const giphyKeyRef = useRef(giphyKey)
+  const skippedMinuteRef = useRef(new Map())
+  const dismissRef = useRef(() => {})
 
   alarmsRef.current = alarms
   ringingRef.current = isRinging
   giphyKeyRef.current = giphyKey
+
+  function minuteStamp(date) {
+    return `${formatDateKey(date)}:${formatHHmm(date)}`
+  }
 
   useEffect(() => {
     localStorage.setItem(ALARMS_KEY, JSON.stringify(alarms))
@@ -144,6 +150,9 @@ export default function App() {
         if (alarm.time !== hhmm) return false
         if (alarm.lastFiredDate === today) return false
         if (wasCreatedThisMinute(alarm, current)) return false
+        if (skippedMinuteRef.current.get(alarm.id) === minuteStamp(current)) {
+          return false
+        }
         return true
       })
 
@@ -160,13 +169,14 @@ export default function App() {
   useEffect(() => {
     if (!isRinging) return undefined
     const onKey = (event) => {
-      if (event.key === 'Escape') dismissAlarm()
+      if (event.key === 'Escape') dismissRef.current()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [isRinging])
 
   async function fireAlarm(alarm, { persist }) {
+    ringingRef.current = true
     setIsRinging(true)
     setActiveAlarm(alarm)
     setMedia(null)
@@ -196,12 +206,18 @@ export default function App() {
   }
 
   function dismissAlarm() {
+    if (activeAlarm) {
+      skippedMinuteRef.current.set(activeAlarm.id, minuteStamp(new Date()))
+    }
+    ringingRef.current = false
     stopAlarmSound()
     setIsRinging(false)
     setActiveAlarm(null)
     setMedia(null)
     setLoadingGif(false)
   }
+
+  dismissRef.current = dismissAlarm
 
   function snoozeAlarm() {
     if (!activeAlarm) return
