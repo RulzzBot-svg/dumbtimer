@@ -1,11 +1,20 @@
 <!doctype html>
-<html lang="en" data-mode="desk">
+<html lang="en" data-mode="desk" data-device="desk">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="256x256" href="/notify-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#f3eee4" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Desk" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta
       name="description"
       content="Office GIF reminders for lunch, meetings, and time to leave — with a Nightstand mode for later."
@@ -23,6 +32,19 @@
         if (mode === 'desk' || mode === 'nightstand') {
           document.documentElement.dataset.mode = mode
         }
+        const requested = new URLSearchParams(location.search).get('device')
+        const ua = navigator.userAgent || ''
+        const uaMobile = navigator.userAgentData && navigator.userAgentData.mobile
+        const phone =
+          requested === 'phone'
+            ? true
+            : requested === 'desk'
+              ? false
+              : typeof uaMobile === 'boolean'
+                ? uaMobile
+                : /iPhone|iPod|Windows Phone|IEMobile|webOS|BlackBerry/i.test(ua) ||
+                  /Android.+Mobile/i.test(ua)
+        document.documentElement.dataset.device = phone ? 'phone' : 'desk'
       } catch (error) {
         // Keep the HTML default.
       }
