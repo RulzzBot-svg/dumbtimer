@@ -37,6 +37,18 @@ export function plusMinutesFromNow(minutesToAdd) {
   return formatHHmm(date)
 }
 
+export function nextDateForHHmm(hhmm, now = new Date()) {
+  const [hours, minutes] = hhmm.split(':').map(Number)
+  const at = new Date(now)
+  at.setSeconds(0, 0)
+  at.setMilliseconds(0)
+  at.setHours(hours, minutes, 0, 0)
+  if (at.getTime() <= now.getTime() + 1500) {
+    at.setDate(at.getDate() + 1)
+  }
+  return at
+}
+
 export function wasCreatedThisMinute(alarm, now) {
   if (!alarm.createdAt) return false
   const created = new Date(alarm.createdAt)

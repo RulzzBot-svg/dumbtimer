@@ -1,0 +1,15 @@
+{
+  "appId": "com.desk.pings",
+  "appName": "Desk",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_desk",
+      "iconColor": "#c24e24",
+      "sound": "chime.wav"
+    }
+  }
+}
