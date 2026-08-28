@@ -7,14 +7,14 @@ import {
   userFromRequest,
   validUsername,
 } from '../server/auth.js'
-import { databaseConfigured, one, run } from '../server/db.js'
+import { databaseConfigured, databaseMissingError, one, run } from '../server/db.js'
 import { methodNotAllowed, publicUser, readJson, send } from '../server/http.js'
 
 export default async function handler(req, res) {
   try {
     if (!databaseConfigured()) {
       return send(res, 503, {
-        error: 'Accounts need a Neon database. Add DATABASE_URL in Vercel (or .env.local for local).',
+        error: databaseMissingError(),
       })
     }
     if (req.method === 'GET') return getMe(req, res)

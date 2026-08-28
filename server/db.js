@@ -1,7 +1,15 @@
 import { neon } from '@neondatabase/serverless'
 import { loadEnv } from './env.js'
 
-loadEnv()
+if (!process.env.VERCEL) loadEnv()
+
+const URL_KEYS = [
+  'DATABASE_URL',
+  'POSTGRES_URL',
+  'POSTGRES_PRISMA_URL',
+  'DATABASE_URL_UNPOOLED',
+  'POSTGRES_URL_NON_POOLING',
+]
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS users (
@@ -39,13 +47,45 @@ const SCHEMA = [
 let sql
 let migrated = false
 
+export function normalizeDatabaseUrl(raw) {
+  let url = String(raw ?? '')
+    .replace(/^\uFEFF/, '')
+    .trim()
+  if (!url) return ''
+  const assign = url.match(
+    /^(?:export\s+)?(?:DATABASE_URL|POSTGRES_URL|POSTGRES_PRISMA_URL)\s*=\s*([\s\S]+)$/i,
+  )
+  if (assign) url = assign[1].trim()
+  if (
+    (url.startsWith('"') && url.endsWith('"')) ||
+    (url.startsWith("'") && url.endsWith("'"))
+  ) {
+    url = url.slice(1, -1).trim()
+  }
+  if (url.startsWith('jdbc:postgresql://')) url = url.slice('jdbc:'.length)
+  return url
+}
+
 export function databaseUrl() {
-  return String(process.env.DATABASE_URL || '').trim()
+  for (const key of URL_KEYS) {
+    const url = normalizeDatabaseUrl(process.env[key])
+    if (url) return url
+  }
+  return ''
 }
 
 export function databaseConfigured() {
   const url = databaseUrl()
   return url.startsWith('postgres://') || url.startsWith('postgresql://')
+}
+
+export function databaseMissingError() {
+  const url = databaseUrl()
+  if (url && !databaseConfigured()) {
+    const scheme = url.split(':')[0].slice(0, 24) || 'unknown'
+    return `DATABASE_URL is set but it is not a postgres URL (starts with “${scheme}”). Paste the Neon pooled connection string that starts with postgresql:// — no quotes. You do not need to create tables.`
+  }
+  return 'No DATABASE_URL on this deploy. In Vercel open the dumbtimer project → Settings → Environment Variables. Name it DATABASE_URL, paste the Neon pooled string (starts with postgresql://, no quotes), enable Production and Preview, Save, then Redeploy. You do not need to create tables.'
 }
 
 export function toPg(sqlText) {
