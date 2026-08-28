@@ -1,12 +1,12 @@
 import { newId, newShareCode, normalizeUsername, userFromRequest, validUsername } from '../server/auth.js'
-import { databaseConfigured, many, one, run } from '../server/db.js'
+import { databaseConfigured, databaseMissingError, many, one, run } from '../server/db.js'
 import { mapPreset, methodNotAllowed, readJson, send } from '../server/http.js'
 
 export default async function handler(req, res) {
   try {
     if (!databaseConfigured()) {
       return send(res, 503, {
-        error: 'Accounts need a Neon database. Add DATABASE_URL in Vercel (or .env.local for local).',
+        error: databaseMissingError(),
       })
     }
     const user = await userFromRequest(req)
