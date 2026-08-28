@@ -6,18 +6,46 @@ Alarms live in `localStorage`, so a refresh does not wipe the day's pings.
 
 A Giphy dashboard key (SDK or API — they are the same key) is already wired via `VITE_GIPHY_API_KEY`. Giphy's JS SDK and the REST Search endpoint both use that dashboard key. You do not need a second "simple API key."
 
-## Phone app
+## Phone app (native)
 
-This is a home-screen web app, not an App Store / Play Store download.
+This is the version that can ping **when Desk is closed**. It wraps the same UI in a tiny Android/iOS app and lets the phone OS own the alarm.
 
-1. Wait until the change is on **production** (`main` → [dumbtimer.vercel.app](https://dumbtimer.vercel.app)).
-2. Open that URL **on your phone**.
-3. Install it:
-   - **iPhone:** Safari only (not Chrome). Share → **Add to Home Screen**.
-   - **Android:** Chrome menu → **Add to Home screen** / **Install app**.
-4. Open it from the icon. Allow notifications when it asks (first time you save a ping).
+### Android
 
-Pings still need the app **left open**. Closing it, swiping it away, or locking the phone for a long time will stop the timer. Same idea as leaving the desktop tab open. The toast is a reminder, not a lock-screen alarm.
+1. Install [Android Studio](https://developer.android.com/studio).
+2. From this repo:
+
+```bash
+npm install
+npm run cap:sync
+npx cap open android
+```
+
+3. In Android Studio: Run on a phone or **Build → Build APK(s)**.
+4. Install the APK, allow notifications, set a ping. You can swipe Desk away; the OS still fires the toast. Tap it to open the GIF.
+
+`npm run android:apk` builds a debug APK at `android/app/build/outputs/apk/debug/app-debug.apk` if the Android SDK is installed.
+
+### iPhone
+
+Needs a Mac, Xcode, and an Apple developer account (TestFlight / USB install):
+
+```bash
+npm run cap:sync
+npx cap open ios
+```
+
+The website Add-to-Home-Screen version still works, but **it cannot** fire after you leave the page. Use the native app for that.
+
+Desktop Chrome is unchanged.
+
+## Phone app (website shortcut)
+
+1. Open production (`main` → [dumbtimer.vercel.app](https://dumbtimer.vercel.app)) on your phone.
+2. **iPhone:** Safari → Share → **Add to Home Screen**.
+3. **Android:** Chrome → **Add to Home screen**.
+
+That shortcut looks like an app but still needs to stay open for pings.
 
 ## Run locally
 
@@ -30,7 +58,7 @@ npm run dev
 
 Vercel production tracks **`main`**. Merging a PR only updates the live site if that PR targets `main`. Preview URLs on other branches do not replace [dumbtimer.vercel.app](https://dumbtimer.vercel.app).
 
-Import this GitHub repo at [vercel.com/new](https://vercel.com/new) if it is not already connected.
+The native Android/iOS projects are not deployed by Vercel; they ship as an APK / TestFlight build.
 
 - Framework: **Vite**
 - Build command: `npm run build`

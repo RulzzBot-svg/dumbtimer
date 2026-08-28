@@ -5,6 +5,8 @@ import { playAlarmSound, stopAlarmSound, unlockAudio } from './lib/audio.js'
 import { COPY } from './lib/copy.js'
 import { applyDevice, detectDevice } from './lib/device.js'
 import { fetchAlarmGif } from './lib/media.js'
+import { isNativeApp } from './lib/native.js'
+import { listenForNativeAlarms, requestNativeNotificationAccess, syncNativeAlarms } from './lib/nativeNotifications.js'
 import { closePingNotification, showPingNotification } from './lib/notify.js'
 import {
   addMinutesHHmm,
@@ -67,6 +69,7 @@ function createAlarm(time, query, { gif, repeat }) {
 }
 
 function maybeNotify(alarm, media, copy) {
+  if (isNativeApp()) return
   showPingNotification({
     title: copy.notifyTitle(alarm.time, alarm.query),
     body: copy.notifyBody(alarm.time),
@@ -98,6 +101,7 @@ export default function App() {
   const modeRef = useRef(mode)
   const skippedMinuteRef = useRef(new Map())
   const dismissRef = useRef(() => {})
+  const fireRef = useRef(() => {})
 
   alarmsRef.current = alarms
   ringingRef.current = isRinging
@@ -168,6 +172,21 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!isNativeApp()) return undefined
+    requestNativeNotificationAccess({ promptExact: false })
+    return listenForNativeAlarms((alarmId) => {
+      const alarm = alarmsRef.current.find((item) => item.id === alarmId)
+      if (!alarm || ringingRef.current) return
+      fireRef.current(alarm, { persist: true })
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!isNativeApp()) return
+    syncNativeAlarms(alarms, mode)
+  }, [alarms, mode])
+
+  useEffect(() => {
     if (!isRinging) return undefined
     const onKey = (event) => {
       if (event.key === 'Escape') dismissRef.current()
@@ -231,6 +250,7 @@ export default function App() {
   }
 
   dismissRef.current = dismissAlarm
+  fireRef.current = fireAlarm
 
   function snoozeAlarm() {
     if (!activeAlarm) return
@@ -255,7 +275,9 @@ export default function App() {
     event.preventDefault()
     if (!time) return
     unlockAudio()
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    if (isNativeApp()) {
+      requestNativeNotificationAccess({ promptExact: true }).catch(() => {})
+    } else if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {})
     }
     const alarm = createAlarm(time, query, { gif: selectedGif, repeat })
