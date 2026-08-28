@@ -25,14 +25,15 @@ Yes — this needs a tiny database. Logins and sharing cannot live only in the b
 
 There is **no email verification**. Username + password is enough. You can add a profile pic, save a ping as a template, copy a share code, or send that template to someone else’s username. They tap **Use** and it fills the form.
 
-Locally, `npm run dev` creates `data/desk.db` automatically.
+The database is [Neon](https://neon.tech) Postgres. Create a project, copy the **pooled** connection string, and set:
 
-On Vercel, add a free [Turso](https://turso.tech) database, then set:
+- `DATABASE_URL` — `postgresql://…@….neon.tech/…?sslmode=require`
 
-- `LIBSQL_URL` — `libsql://….turso.io`
-- `LIBSQL_AUTH_TOKEN`
+Paste that into Vercel → Project → Settings → Environment Variables (Production, Preview, and Development). For `npm run dev` on your machine, put the same value in `.env.local` (that file is gitignored).
 
-Without those, the site still works; Log in will say the database is missing.
+Tables are created automatically on first login. You can also paste `db/schema.sql` into the Neon SQL editor if you want to create them yourself.
+
+Without `DATABASE_URL`, the site still works; Log in will say the database is missing.
 
 ## Run locally
 
@@ -53,4 +54,4 @@ Import this GitHub repo at [vercel.com/new](https://vercel.com/new) if it is not
 
 If GIF search looks unrelated or empty, add `VITE_GIPHY_API_KEY` in Vercel → Project → Settings → Environment Variables, then Redeploy. The dashboard SDK key is the same key Search uses.
 
-For accounts, also add `LIBSQL_URL` and `LIBSQL_AUTH_TOKEN` (Turso).
+For accounts, also add `DATABASE_URL` (the Neon pooled connection string).

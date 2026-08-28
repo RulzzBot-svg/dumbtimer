@@ -14,7 +14,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "@libsql/client": "^0.17.4",
+    "@neondatabase/serverless": "^1.1.0",
     "@tailwindcss/vite": "^4.3.3",
     "bcryptjs": "^3.0.3",
     "react": "^19.2.8",

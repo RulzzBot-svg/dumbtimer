@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   try {
     if (!databaseConfigured()) {
       return send(res, 503, {
-        error: 'Accounts need a database URL. Add LIBSQL_URL in Vercel env.',
+        error: 'Accounts need a Neon database. Add DATABASE_URL in Vercel (or .env.local for local).',
       })
     }
     if (req.method === 'GET') return getMe(req, res)

@@ -1,4 +1,7 @@
 import http from 'node:http'
+import { loadEnv } from '../server/env.js'
+
+loadEnv()
 
 const PORT = Number(process.env.API_PORT || 8788)
 
