@@ -15,6 +15,7 @@ dist-ssr
 .env.*.local
 .vercel
 data/
+public/desk-pinger.zip
 
 # Editor directories and files
 .vscode/*

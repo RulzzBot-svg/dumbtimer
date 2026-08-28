@@ -10,6 +10,7 @@ import { fetchAlarmGif } from './lib/media.js'
 import { isNativeApp } from './lib/native.js'
 import { listenForNativeAlarms, requestNativeNotificationAccess, syncNativeAlarms } from './lib/nativeNotifications.js'
 import { closePingNotification, showPingNotification } from './lib/notify.js'
+import { deskPingerInstalled, writePingerSnapshot } from './lib/pinger.js'
 import {
   addMinutesHHmm,
   formatDateKey,
@@ -72,6 +73,7 @@ function createAlarm(time, query, { gif, repeat }) {
 
 function maybeNotify(alarm, media, copy) {
   if (isNativeApp()) return
+  if (deskPingerInstalled()) return
   showPingNotification({
     title: copy.notifyTitle(alarm.time, alarm.query),
     body: copy.notifyBody(alarm.time),
@@ -141,6 +143,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(ALARMS_KEY, JSON.stringify(alarms))
   }, [alarms])
+
+  useEffect(() => {
+    writePingerSnapshot({ user, alarms, mode })
+  }, [user, alarms, mode])
 
   useEffect(() => {
     if (giphyKey) localStorage.setItem(GIPHY_KEY, giphyKey)
