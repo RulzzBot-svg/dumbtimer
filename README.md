@@ -19,6 +19,21 @@ This is a home-screen web app, not an App Store / Play Store download.
 
 Pings still need the app **left open**. Closing it, swiping it away, or locking the phone for a long time will stop the timer. Same idea as leaving the desktop tab open. The toast is a reminder, not a lock-screen alarm.
 
+## Accounts and shared templates
+
+Yes — this needs a tiny database. Logins and sharing cannot live only in the browser if you want them on another phone.
+
+There is **no email verification**. Username + password is enough. You can add a profile pic, save a ping as a template, copy a share code, or send that template to someone else’s username. They tap **Use** and it fills the form.
+
+Locally, `npm run dev` creates `data/desk.db` automatically.
+
+On Vercel, add a free [Turso](https://turso.tech) database, then set:
+
+- `LIBSQL_URL` — `libsql://….turso.io`
+- `LIBSQL_AUTH_TOKEN`
+
+Without those, the site still works; Log in will say the database is missing.
+
 ## Run locally
 
 ```bash
@@ -37,3 +52,5 @@ Import this GitHub repo at [vercel.com/new](https://vercel.com/new) if it is not
 - Output: `dist`
 
 If GIF search looks unrelated or empty, add `VITE_GIPHY_API_KEY` in Vercel → Project → Settings → Environment Variables, then Redeploy. The dashboard SDK key is the same key Search uses.
+
+For accounts, also add `LIBSQL_URL` and `LIBSQL_AUTH_TOKEN` (Turso).

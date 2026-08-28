@@ -15,6 +15,8 @@ export function AlarmForm({
   onGifChange,
   onRepeatChange,
   onSubmit,
+  canSaveTemplate,
+  onSaveTemplate,
 }) {
   const desk = mode === 'desk'
 
@@ -126,6 +128,15 @@ export function AlarmForm({
       >
         {copy.saveLabel}
       </button>
+      {canSaveTemplate ? (
+        <button
+          type="button"
+          onClick={onSaveTemplate}
+          className="mt-2 h-11 w-full rounded-2xl border border-line text-sm font-medium text-fg transition hover:border-accent"
+        >
+          Save as template
+        </button>
+      ) : null}
     </form>
   )
 }

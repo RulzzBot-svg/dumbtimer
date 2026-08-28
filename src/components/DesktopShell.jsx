@@ -22,6 +22,8 @@ export function DesktopShell({
   media,
   loadingGif,
   toast,
+  accountButton,
+  canSaveTemplate,
   onModeChange,
   onTimeChange,
   onQueryChange,
@@ -34,14 +36,18 @@ export function DesktopShell({
   onPreview,
   onDismiss,
   onSnooze,
+  onSaveTemplate,
 }) {
   return (
     <div className="relative min-h-svh overflow-x-hidden bg-bg text-fg">
       <AppBackdrop mode={mode} />
 
       <main className="relative mx-auto flex min-h-svh max-w-2xl flex-col gap-10 px-5 py-10 sm:py-16">
-        <div className="flex justify-center">
+        <div className="relative flex items-center justify-center">
           <ModeToggle mode={mode} onChange={onModeChange} />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2">
+            {accountButton}
+          </div>
         </div>
 
         <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
@@ -59,6 +65,8 @@ export function DesktopShell({
           onGifChange={onGifChange}
           onRepeatChange={onRepeatChange}
           onSubmit={onSubmit}
+          canSaveTemplate={canSaveTemplate}
+          onSaveTemplate={onSaveTemplate}
         />
 
         <AlarmDashboard
@@ -66,6 +74,7 @@ export function DesktopShell({
           alarms={alarms}
           onDelete={onDelete}
           onPreview={onPreview}
+          onSaveTemplate={canSaveTemplate ? onSaveTemplate : undefined}
         />
 
         <section className="mt-auto rounded-3xl border border-line bg-card/70 p-4 text-sm text-muted">
