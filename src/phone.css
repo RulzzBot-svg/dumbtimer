@@ -30,6 +30,8 @@ html[data-device="phone"] .phone-header {
   top: 0;
   z-index: 10;
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
   justify-content: stretch;
   padding-top: 0.15rem;
   padding-bottom: 0.35rem;
@@ -40,7 +42,7 @@ html[data-device="phone"] .phone-header {
   );
 }
 
-html[data-device="phone"] .phone-header [role='tablist'] {
+html[data-device="phone"] .phone-header-toggle [role='tablist'] {
   display: flex;
   width: 100%;
 }

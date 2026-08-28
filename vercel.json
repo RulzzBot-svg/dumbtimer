@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!sw\\.js|manifest\\.webmanifest).*)",
+      "source": "/((?!api(?:/|$)|sw\\.js|manifest\\.webmanifest).*)",
       "destination": "/index.html"
     }
   ],

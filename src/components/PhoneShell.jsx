@@ -39,6 +39,9 @@ export function PhoneShell({
   onPreview,
   onDismiss,
   onSnooze,
+  accountButton,
+  canSaveTemplate,
+  onSaveTemplate,
 }) {
   useEffect(() => {
     if (isNativeApp()) {
@@ -60,7 +63,10 @@ export function PhoneShell({
 
       <main className="phone-main relative mx-auto flex min-h-svh max-w-lg flex-col gap-7 px-4">
         <header className="phone-header">
-          <ModeToggle mode={mode} onChange={onModeChange} />
+          <div className="phone-header-toggle min-w-0 flex-1">
+            <ModeToggle mode={mode} onChange={onModeChange} />
+          </div>
+          {accountButton}
         </header>
 
         <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
@@ -78,6 +84,7 @@ export function PhoneShell({
           alarms={alarms}
           onDelete={onDelete}
           onPreview={onPreview}
+          onSaveTemplate={canSaveTemplate ? onSaveTemplate : undefined}
         />
 
         <AlarmForm
@@ -93,6 +100,8 @@ export function PhoneShell({
           onGifChange={onGifChange}
           onRepeatChange={onRepeatChange}
           onSubmit={onSubmit}
+          canSaveTemplate={canSaveTemplate}
+          onSaveTemplate={onSaveTemplate}
         />
 
         <section className="mb-2 rounded-3xl border border-line bg-card/70 p-4 text-sm text-muted">

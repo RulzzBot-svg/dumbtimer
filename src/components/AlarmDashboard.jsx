@@ -1,6 +1,6 @@
 import { formatPrettyTime } from '../lib/time.js'
 
-export function AlarmDashboard({ copy, alarms, onDelete, onPreview }) {
+export function AlarmDashboard({ copy, alarms, onDelete, onPreview, onSaveTemplate }) {
   return (
     <section>
       <div className="mb-3 flex items-baseline justify-between gap-3">
@@ -50,6 +50,15 @@ export function AlarmDashboard({ copy, alarms, onDelete, onPreview }) {
                 >
                   Preview
                 </button>
+                {onSaveTemplate ? (
+                  <button
+                    type="button"
+                    onClick={() => onSaveTemplate(alarm)}
+                    className="rounded-full border border-line px-4 py-2 text-sm text-fg transition hover:border-accent hover:text-accent"
+                  >
+                    Template
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => onDelete(alarm.id)}

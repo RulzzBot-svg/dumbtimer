@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { AccountButton, AccountDrawer } from './components/AccountMenu.jsx'
 import { DesktopShell } from './components/DesktopShell.jsx'
 import { PhoneShell } from './components/PhoneShell.jsx'
 import { playAlarmSound, stopAlarmSound, unlockAudio } from './lib/audio.js'
 import { COPY } from './lib/copy.js'
 import { applyDevice, detectDevice } from './lib/device.js'
+import { createPreset, fetchMe } from './lib/account.js'
 import { fetchAlarmGif } from './lib/media.js'
 import { isNativeApp } from './lib/native.js'
 import { listenForNativeAlarms, requestNativeNotificationAccess, syncNativeAlarms } from './lib/nativeNotifications.js'
@@ -93,6 +95,10 @@ export default function App() {
   const [media, setMedia] = useState(null)
   const [loadingGif, setLoadingGif] = useState(false)
   const [toast, setToast] = useState('')
+  const [user, setUser] = useState(null)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [presets, setPresets] = useState([])
+  const [inbox, setInbox] = useState([])
 
   const copy = COPY[mode]
   const alarmsRef = useRef(alarms)
@@ -115,6 +121,10 @@ export default function App() {
   useEffect(() => {
     applyDevice(device)
   }, [device])
+
+  useEffect(() => {
+    fetchMe().then(setUser)
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.mode = mode
@@ -288,6 +298,41 @@ export default function App() {
     setSelectedGif(null)
   }
 
+  async function handleSaveTemplate(source) {
+    if (!user) {
+      setAccountOpen(true)
+      setToast('Log in to save a template')
+      return
+    }
+    const template = source?.time
+      ? source
+      : { time, query, gif: selectedGif, repeat, name: query }
+    try {
+      const saved = await createPreset({
+        name: template.query || template.name,
+        time: template.time,
+        query: template.query,
+        gif: template.gif || null,
+        repeat: template.repeat,
+      })
+      setPresets((current) => [saved, ...current.filter((item) => item.id !== saved.id)])
+      setToast(`Template saved · ${saved.shareCode}`)
+      setAccountOpen(true)
+    } catch (error) {
+      setToast(error.message)
+      if (error.status === 401) setAccountOpen(true)
+    }
+  }
+
+  function handleUsePreset(preset) {
+    if (preset.time) setTime(preset.time)
+    setQuery(preset.query)
+    setSelectedGif(preset.gif || null)
+    setRepeat(preset.repeat === 'once' ? 'once' : 'daily')
+    setAccountOpen(false)
+    setToast(`Loaded ${preset.name}`)
+  }
+
   const shell = {
     mode,
     copy,
@@ -319,7 +364,37 @@ export default function App() {
     },
     onDismiss: dismissAlarm,
     onSnooze: snoozeAlarm,
+    accountButton: (
+      <AccountButton user={user} onOpen={() => setAccountOpen(true)} />
+    ),
+    canSaveTemplate: Boolean(user),
+    onSaveTemplate: handleSaveTemplate,
   }
 
-  return device === 'phone' ? <PhoneShell {...shell} /> : <DesktopShell {...shell} />
+  return (
+    <>
+      {device === 'phone' ? <PhoneShell {...shell} /> : <DesktopShell {...shell} />}
+      <AccountDrawer
+        open={accountOpen}
+        user={user}
+        presets={presets}
+        inbox={inbox}
+        onClose={() => setAccountOpen(false)}
+        onAuth={(next) => {
+          setUser(next)
+          if (!next) {
+            setPresets([])
+            setInbox([])
+          }
+        }}
+        onUser={setUser}
+        onPresets={(payload) => {
+          setPresets(payload.presets || [])
+          setInbox(payload.inbox || [])
+        }}
+        onUsePreset={handleUsePreset}
+        onToast={setToast}
+      />
+    </>
+  )
 }

@@ -47,6 +47,22 @@ Desktop Chrome is unchanged.
 
 That shortcut looks like an app but still needs to stay open for pings.
 
+## Accounts and shared templates
+
+Yes — this needs a tiny database. Logins and sharing cannot live only in the browser if you want them on another phone.
+
+There is **no email verification**. Username + password is enough. You can add a profile pic, save a ping as a template, copy a share code, or send that template to someone else’s username. They tap **Use** and it fills the form.
+
+The database is [Neon](https://neon.tech) Postgres. Create a project, copy the **pooled** connection string, and set:
+
+- `DATABASE_URL` — `postgresql://…@….neon.tech/…?sslmode=require`
+
+Paste that into Vercel → Project → Settings → Environment Variables (Production, Preview, and Development). For `npm run dev` on your machine, put the same value in `.env.local` (that file is gitignored).
+
+Tables are created automatically on first login. You can also paste `db/schema.sql` into the Neon SQL editor if you want to create them yourself.
+
+Without `DATABASE_URL`, the site still works; Log in will say the database is missing.
+
 ## Run locally
 
 ```bash
@@ -65,3 +81,5 @@ The native Android/iOS projects are not deployed by Vercel; they ship as an APK 
 - Output: `dist`
 
 If GIF search looks unrelated or empty, add `VITE_GIPHY_API_KEY` in Vercel → Project → Settings → Environment Variables, then Redeploy. The dashboard SDK key is the same key Search uses.
+
+For accounts, also add `DATABASE_URL` (the Neon pooled connection string).
