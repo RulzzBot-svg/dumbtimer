@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { unlockAudio } from '../lib/audio.js'
 import { keepAwake } from '../lib/wakeLock.js'
+import { isNativeApp } from '../lib/native.js'
 import { AlarmDashboard } from './AlarmDashboard.jsx'
 import { AlarmForm } from './AlarmForm.jsx'
 import { AlarmModal } from './AlarmModal.jsx'
@@ -43,6 +44,10 @@ export function PhoneShell({
   onSaveTemplate,
 }) {
   useEffect(() => {
+    if (isNativeApp()) {
+      keepAwake(false)
+      return undefined
+    }
     keepAwake(mode === 'nightstand' || isRinging || alarms.length > 0)
     return () => {
       keepAwake(false)
@@ -67,10 +72,12 @@ export function PhoneShell({
         <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
 
         <p className="phone-keep-open text-center text-sm text-muted">
-          Leave Desk open for pings — same idea as the desktop tab.
+          {isNativeApp()
+            ? 'Pings still fire if Desk is closed. Tap the notification to open the GIF.'
+            : 'Leave Desk open for pings — same idea as the desktop tab.'}
         </p>
 
-        <InstallHint />
+        {isNativeApp() ? null : <InstallHint />}
 
         <AlarmDashboard
           copy={copy}
