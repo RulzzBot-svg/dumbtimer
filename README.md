@@ -37,37 +37,15 @@ npx cap open ios
 
 The website Add-to-Home-Screen version still works, but **it cannot** fire after you leave the page. Use the native app for that.
 
-Desktop Chrome can stay a website. If you want pings after you **close the tab** (Chrome still running), use the optional **Desk pinger** extension.
+Desktop Chrome can stay a website. If you want pings after you **close the tab** (Chrome still running), install **Desk pinger** from the Chrome Web Store:
 
-### Load unpacked (you, right now)
-
-1. Download [desk-pinger.zip](https://dumbtimer.vercel.app/desk-pinger.zip) (or use the `extension/` folder).
-2. Unzip it.
-3. Chrome → **Extensions** → Developer mode → **Load unpacked** → pick that folder.
-4. Open [dumbtimer.vercel.app](https://dumbtimer.vercel.app) once while logged in.
-
-### Publish it on the Chrome Web Store (so other people can install it)
-
-Google does not let a website push an extension into Chrome. You publish it from your Google account:
-
-1. Pay the one-time **$5** Chrome Web Store developer fee at [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
-2. Zip the `extension/` folder (or download `desk-pinger.zip` from production after this ships). The zip must contain `manifest.json` at the **top level**, not inside another folder.
-3. Dashboard → **New item** → upload that zip.
-4. Store listing:
-   - Name: **Desk pinger**
-   - Summary: pings after you close the Desk tab
-   - Privacy policy URL: `https://dumbtimer.vercel.app/pinger-privacy.html`
-   - Homepage: `https://dumbtimer.vercel.app`
-   - Category: Productivity
-   - Screenshots: at least one **1280×800** or **640×400** of the popup / Desk site
-5. Justify permissions in the form: `alarms` and `notifications` fire the ping; `storage` remembers your name/pic/alarms on this computer; host access is only the Desk site so it can sync.
-6. Submit for review. First listings often take a few days. Unlisted is an option if you only want a link for friends.
-
-After it is approved, people install it from the store page like any other extension. You can paste that store URL on Desk later.
+[chromewebstore.google.com/detail/desk-pinger](https://chromewebstore.google.com/detail/desk-pinger/lenaokmamekcbhkkbipjllpcpomaokkg)
 
 The popup is only identity + how many pings you have. Click it and you’re back on the website. There is no login form in the extension. The tray toast is still a still image; if the tab is closed, a small window plays the GIF.
 
 Chrome itself has to stay open. Quit Chrome and nothing fires — that’s what the phone APK is for.
+
+The published extension only syncs on [dumbtimer.vercel.app](https://dumbtimer.vercel.app), not localhost. To work on the extension itself: `extension/` folder → Chrome → **Extensions** → Developer mode → **Load unpacked**. Update the listing from the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
 ## Phone app (website shortcut)
 

@@ -1,5 +1,7 @@
 export const PINGER_KEY = 'desk.pinger.v1'
 export const PINGER_EVENT = 'desk-pinger-sync'
+export const CHROME_STORE_URL =
+  'https://chromewebstore.google.com/detail/desk-pinger/lenaokmamekcbhkkbipjllpcpomaokkg'
 
 function compactGif(gif) {
   if (!gif || typeof gif !== 'object') return null
