@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isNativeApp } from '../lib/native.js'
+import { CHROME_STORE_URL } from '../lib/pinger.js'
 
 function isDesktopChromium() {
   if (typeof navigator === 'undefined') return false
@@ -11,6 +12,19 @@ function isDesktopChromium() {
 function isLocalDev() {
   const host = window.location.hostname
   return host === 'localhost' || host === '127.0.0.1'
+}
+
+function StoreLink({ children }) {
+  return (
+    <a
+      href={CHROME_STORE_URL}
+      target="_blank"
+      rel="noreferrer"
+      className="text-accent underline decoration-accent/30 underline-offset-2"
+    >
+      {children}
+    </a>
+  )
 }
 
 export function PingerHint() {
@@ -43,19 +57,14 @@ export function PingerHint() {
       stay running.{' '}
       {isLocalDev() ? (
         <span>
-          Load unpacked from the <code>extension</code> folder, then open{' '}
-          <span className="text-fg">dumbtimer.vercel.app</span> so it can sync
-          (the published build does not run on localhost).
+          The published build only syncs on{' '}
+          <span className="text-fg">dumbtimer.vercel.app</span>. Install it from the{' '}
+          <StoreLink>Chrome Web Store</StoreLink>, or load unpacked from the{' '}
+          <code>extension</code> folder for local work.
         </span>
       ) : (
         <>
-          <a
-            href="/desk-pinger.zip"
-            className="text-accent underline decoration-accent/30 underline-offset-2"
-          >
-            Download
-          </a>
-          , unzip, then Chrome → Extensions → Load unpacked.
+          <StoreLink>Add to Chrome</StoreLink> from the store.
         </>
       )}{' '}
       The popup is just your name, pic, and ping count — tap it to come back here.
