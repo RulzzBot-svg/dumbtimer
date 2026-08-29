@@ -4,6 +4,7 @@ import { AlarmModal } from './AlarmModal.jsx'
 import { AppBackdrop } from './AppBackdrop.jsx'
 import { ClockDisplay } from './ClockDisplay.jsx'
 import { ModeToggle } from './ModeToggle.jsx'
+import { PingerHint } from './PingerHint.jsx'
 import { Toast } from './Toast.jsx'
 
 export function DesktopShell({
@@ -51,6 +52,7 @@ export function DesktopShell({
         </div>
 
         <ClockDisplay now={now} mode={mode} kicker={copy.kicker} />
+        <PingerHint />
 
         <AlarmForm
           mode={mode}

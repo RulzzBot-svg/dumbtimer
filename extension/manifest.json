@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Desk pinger",
+  "version": "1.0.0",
+  "description": "Fire Desk pings after you close the tab. Chrome must stay open. The website stays the app.",
+  "action": {
+    "default_title": "Desk pinger",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon-128.png"
+    }
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["alarms", "notifications", "storage"],
+  "host_permissions": [
+    "https://dumbtimer.vercel.app/*",
+    "http://localhost:5173/*",
+    "http://127.0.0.1:5173/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dumbtimer.vercel.app/*",
+        "http://localhost:5173/*",
+        "http://127.0.0.1:5173/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

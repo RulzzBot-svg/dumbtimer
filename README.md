@@ -37,7 +37,16 @@ npx cap open ios
 
 The website Add-to-Home-Screen version still works, but **it cannot** fire after you leave the page. Use the native app for that.
 
-Desktop Chrome is unchanged.
+Desktop Chrome can stay a website. If you want pings after you **close the tab** (Chrome still running), load the optional **Desk pinger** extension:
+
+1. Download [desk-pinger.zip](https://dumbtimer.vercel.app/desk-pinger.zip) (or use the `extension/` folder in this repo).
+2. Unzip it.
+3. Chrome → **Extensions** → turn on Developer mode → **Load unpacked** → pick that folder.
+4. Open Desk once while logged in so it can copy your name, pic, and ping count.
+
+The popup is only identity + how many pings you have. Click it and you’re back on the website. There is no login form in the extension. The tray toast is still a still image; if the tab is closed, a small window plays the GIF.
+
+Chrome itself has to stay open. Quit Chrome and nothing fires — that’s what the phone APK is for.
 
 ## Phone app (website shortcut)
 
