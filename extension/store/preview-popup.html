@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Desk pinger popup</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1280px;
+        height: 800px;
+        background: #f3eee4;
+        color: #1c1915;
+        font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+      }
+      .stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 1280px;
+        height: 800px;
+        gap: 28px;
+      }
+      h1 {
+        margin: 0;
+        font-family: Georgia, "Fraunces", serif;
+        font-size: 42px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0;
+        color: #6f675c;
+        font-size: 18px;
+      }
+      .card {
+        display: flex;
+        width: 320px;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: #fffcf6;
+        box-shadow: 0 16px 40px rgba(28, 25, 21, 0.12);
+      }
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #1c1915;
+        color: #f3eee4;
+        font-weight: 600;
+        font-size: 18px;
+      }
+      .name {
+        display: block;
+        font-weight: 600;
+        font-size: 16px;
+      }
+      .meta {
+        display: block;
+        margin-top: 2px;
+        color: #6f675c;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <h1>Desk pinger</h1>
+      <p>Your name, pic, and ping count. Click it to open Desk.</p>
+      <div class="card">
+        <span class="avatar">R</span>
+        <span>
+          <span class="name">Rulz</span>
+          <span class="meta">3 pings</span>
+        </span>
+      </div>
+    </div>
+  </body>
+</html>

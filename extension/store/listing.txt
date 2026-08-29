@@ -1,0 +1,47 @@
+Chrome Web Store listing copy — paste these in.
+
+NAME
+Desk pinger
+
+SHORT DESCRIPTION (132 characters max)
+GIF pings after you close the Desk tab. Chrome stays open. Click the icon for your name, pic, and ping count.
+
+DETAILED DESCRIPTION
+Desk pinger is a tiny companion to Desk (dumbtimer.vercel.app), the GIF reminder site.
+
+The website is still the app: set times, pick GIFs, log in, save templates. This extension only does one job — fire the ping after you close the tab, as long as Chrome is still running.
+
+Click the toolbar icon to see your username, profile pic, and how many pings you have. Click anywhere in that popup and Desk opens. There is no password field in the extension. You sign in on the website.
+
+When a ping is due and Desk is closed, Chrome shows a toast. A small window can play the GIF. Quit Chrome and nothing fires.
+
+Privacy: the extension copies your name, pic, and alarms from the Desk tab onto this computer. That copy does not leave your browser. Privacy policy: https://dumbtimer.vercel.app/pinger-privacy.html
+
+CATEGORY
+Productivity
+
+LANGUAGE
+English
+
+HOMEPAGE
+https://dumbtimer.vercel.app
+
+PRIVACY POLICY
+https://dumbtimer.vercel.app/pinger-privacy.html
+
+SINGLE PURPOSE
+Fire Desk GIF reminders after the website tab is closed.
+
+PERMISSION JUSTIFICATIONS
+alarms — schedule pings for the times you saved on Desk
+notifications — show the toast when a ping is due
+storage — remember your name, pic, and alarm list on this computer
+host access to dumbtimer.vercel.app — read the Desk tab so the extension can sync
+
+ASSETS IN THIS FOLDER
+icon-128.png — Store icon (128x128, 24-bit PNG, no alpha)
+screenshot-1-desk.png — Desk website
+screenshot-2-popup.png — extension popup
+screenshot-3-nightstand.png — Nightstand mode
+screenshot-4-gif-ping.png — GIF ping window
+screenshot-5-account.png — sign-in on Desk

@@ -16,6 +16,9 @@ dist-ssr
 .vercel
 data/
 public/desk-pinger.zip
+extension/store/raw/
+extension/store/ping-demo.gif
+extension/store/ping-still.jpg
 
 # Editor directories and files
 .vscode/*
