@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import {
-  createPreset,
+  createGroup,
+  deleteGroup,
   deletePreset,
   fetchPresets,
   importPreset,
   loginAccount,
   logoutAccount,
+  movePreset,
   registerAccount,
   resizeProfilePic,
   sharePreset,
@@ -33,7 +35,7 @@ function Avatar({ user, size = 'md' }) {
   )
 }
 
-function TemplateCard({ preset, onUse, onShare, onCopy, onDelete }) {
+function TemplateCard({ preset, groups, onUse, onShare, onCopy, onDelete, onMove }) {
   return (
     <li className="rounded-2xl border border-line bg-bg p-3">
       <div className="flex items-center gap-3">
@@ -84,6 +86,21 @@ function TemplateCard({ preset, onUse, onShare, onCopy, onDelete }) {
             Copy code
           </button>
         ) : null}
+        {onMove && groups ? (
+          <select
+            value={preset.groupId || ''}
+            aria-label="Move template to group"
+            onChange={(event) => onMove(preset, event.target.value || null)}
+            className="rounded-full border border-line bg-card px-2 py-1.5 text-xs text-fg"
+          >
+            <option value="">Ungrouped</option>
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
+        ) : null}
         {onDelete ? (
           <button
             type="button"
@@ -118,6 +135,7 @@ export function AccountDrawer({
   open,
   user,
   presets,
+  groups = [],
   inbox,
   onClose,
   onAuth,
@@ -132,6 +150,7 @@ export function AccountDrawer({
   const [shareUser, setShareUser] = useState('')
   const [shareTarget, setShareTarget] = useState(null)
   const [importCode, setImportCode] = useState('')
+  const [groupName, setGroupName] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -224,14 +243,47 @@ export function AccountDrawer({
     setBusy(true)
     setError('')
     try {
-      const preset = await importPreset(importCode)
-      onPresets(await fetchPresets())
-      onToast(`Imported ${preset.name}`)
+      const result = await importPreset(importCode)
+      onPresets(result.library || (await fetchPresets()))
+      if (result.group) {
+        onToast(`Imported ${result.presets.length} into ${result.group.name}`)
+      } else {
+        onToast(`Imported ${result.presets?.[0]?.name || 'template'}`)
+      }
       setImportCode('')
     } catch (caught) {
       setError(caught.message)
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function handleCreateGroup(event) {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    try {
+      await createGroup(groupName)
+      onPresets(await fetchPresets())
+      onToast(`Group ${groupName.trim()} ready`)
+      setGroupName('')
+    } catch (caught) {
+      setError(caught.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function refreshLibrary() {
+    onPresets(await fetchPresets())
+  }
+
+  async function copyCode(code) {
+    try {
+      await navigator.clipboard.writeText(code)
+      onToast(`Copied ${code}`)
+    } catch {
+      onToast(code)
     }
   }
 
@@ -344,6 +396,10 @@ export function AccountDrawer({
               <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
                 Have a code?
               </p>
+              <p className="text-xs text-muted">
+                One code drops into your list. A pack of two or more becomes a new
+                group. You can paste several codes at once.
+              </p>
               <div className="flex gap-2">
                 <input
                   value={importCode}
@@ -393,39 +449,126 @@ export function AccountDrawer({
 
             <section>
               <h3 className="mb-2 font-serif text-xl text-fg">Your templates</h3>
-              {presets.length === 0 ? (
+              <form onSubmit={handleCreateGroup} className="mb-3 flex gap-2">
+                <input
+                  value={groupName}
+                  onChange={(event) => setGroupName(event.target.value)}
+                  placeholder="New group name"
+                  className="h-11 min-w-0 flex-1 rounded-2xl border border-line bg-bg px-3 text-fg outline-none focus:border-accent"
+                />
+                <button
+                  type="submit"
+                  disabled={busy || !groupName.trim()}
+                  className="rounded-2xl border border-line px-3 text-sm text-fg"
+                >
+                  Group
+                </button>
+              </form>
+              {presets.length === 0 && groups.length === 0 ? (
                 <p className="text-sm text-muted">
                   Save a ping as a template, then share the code or send it to a
-                  username.
+                  username. Import a pack and it lands in a group.
                 </p>
               ) : (
-                <ul className="grid gap-2">
-                  {presets.map((preset) => (
-                    <TemplateCard
-                      key={preset.id}
-                      preset={preset}
-                      onUse={onUsePreset}
-                      onShare={setShareTarget}
-                      onCopy={async (code) => {
-                        try {
-                          await navigator.clipboard.writeText(code)
-                          onToast(`Copied ${code}`)
-                        } catch {
-                          onToast(code)
-                        }
-                      }}
-                      onDelete={async (item) => {
-                        try {
-                          await deletePreset(item.id)
-                          onPresets(await fetchPresets())
-                          onToast('Template removed')
-                        } catch (caught) {
-                          setError(caught.message)
-                        }
-                      }}
-                    />
+                <div className="grid gap-4">
+                  {presets.length > 0 ? (
+                    <ul className="grid gap-2">
+                      {presets.map((preset) => (
+                        <TemplateCard
+                          key={preset.id}
+                          preset={preset}
+                          groups={groups}
+                          onUse={onUsePreset}
+                          onShare={setShareTarget}
+                          onCopy={copyCode}
+                          onMove={async (item, groupId) => {
+                            try {
+                              onPresets(await movePreset(item.id, groupId))
+                            } catch (caught) {
+                              setError(caught.message)
+                            }
+                          }}
+                          onDelete={async (item) => {
+                            try {
+                              await deletePreset(item.id)
+                              await refreshLibrary()
+                              onToast('Template removed')
+                            } catch (caught) {
+                              setError(caught.message)
+                            }
+                          }}
+                        />
+                      ))}
+                    </ul>
+                  ) : null}
+                  {groups.map((group) => (
+                    <div key={group.id} className="rounded-3xl border border-line bg-bg/60 p-3">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-fg">{group.name}</p>
+                          <p className="font-mono text-xs tracking-wider text-accent">
+                            {group.shareCode}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => copyCode(group.shareCode)}
+                            className="rounded-full border border-line px-3 py-1.5 text-xs text-fg"
+                          >
+                            Copy pack
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                onPresets(await deleteGroup(group.id))
+                                onToast('Group removed — templates stayed')
+                              } catch (caught) {
+                                setError(caught.message)
+                              }
+                            }}
+                            className="rounded-full border border-line px-3 py-1.5 text-xs text-muted"
+                          >
+                            Ungroup
+                          </button>
+                        </div>
+                      </div>
+                      {group.presets.length === 0 ? (
+                        <p className="text-sm text-muted">Empty. Move a template in.</p>
+                      ) : (
+                        <ul className="grid gap-2">
+                          {group.presets.map((preset) => (
+                            <TemplateCard
+                              key={preset.id}
+                              preset={preset}
+                              groups={groups}
+                              onUse={onUsePreset}
+                              onShare={setShareTarget}
+                              onCopy={copyCode}
+                              onMove={async (item, groupId) => {
+                                try {
+                                  onPresets(await movePreset(item.id, groupId))
+                                } catch (caught) {
+                                  setError(caught.message)
+                                }
+                              }}
+                              onDelete={async (item) => {
+                                try {
+                                  await deletePreset(item.id)
+                                  await refreshLibrary()
+                                  onToast('Template removed')
+                                } catch (caught) {
+                                  setError(caught.message)
+                                }
+                              }}
+                            />
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </section>
 

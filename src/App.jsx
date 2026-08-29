@@ -100,6 +100,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [accountOpen, setAccountOpen] = useState(false)
   const [presets, setPresets] = useState([])
+  const [groups, setGroups] = useState([])
   const [inbox, setInbox] = useState([])
 
   const copy = COPY[mode]
@@ -384,18 +385,21 @@ export default function App() {
         open={accountOpen}
         user={user}
         presets={presets}
+        groups={groups}
         inbox={inbox}
         onClose={() => setAccountOpen(false)}
         onAuth={(next) => {
           setUser(next)
           if (!next) {
             setPresets([])
+            setGroups([])
             setInbox([])
           }
         }}
         onUser={setUser}
         onPresets={(payload) => {
           setPresets(payload.presets || [])
+          setGroups(payload.groups || [])
           setInbox(payload.inbox || [])
         }}
         onUsePreset={handleUsePreset}

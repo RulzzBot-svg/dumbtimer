@@ -43,7 +43,9 @@ export function PingerHint() {
       stay running.{' '}
       {isLocalDev() ? (
         <span>
-          Load unpacked from the <code>extension</code> folder in this repo.
+          Load unpacked from the <code>extension</code> folder, then open{' '}
+          <span className="text-fg">dumbtimer.vercel.app</span> so it can sync
+          (the published build does not run on localhost).
         </span>
       ) : (
         <>
