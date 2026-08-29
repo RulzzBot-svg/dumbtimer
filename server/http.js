@@ -53,5 +53,16 @@ export function mapPreset(row) {
     repeat: row.repeat === 'once' ? 'once' : 'daily',
     owner: row.owner_username || undefined,
     createdAt: row.created_at,
+    groupId: row.group_id || null,
+  }
+}
+
+export function mapGroup(row, presets = []) {
+  return {
+    id: row.id,
+    name: row.name,
+    shareCode: row.share_code,
+    createdAt: row.created_at,
+    presets,
   }
 }

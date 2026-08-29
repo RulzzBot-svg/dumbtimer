@@ -34,3 +34,13 @@ CREATE TABLE IF NOT EXISTS shares (
   to_username TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS preset_groups (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  share_code TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL
+);
+
+ALTER TABLE presets ADD COLUMN IF NOT EXISTS group_id TEXT;

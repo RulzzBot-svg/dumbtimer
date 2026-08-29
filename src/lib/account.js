@@ -98,12 +98,33 @@ export async function sharePreset(presetId, username) {
   })
 }
 
-export async function importPreset(code) {
+export async function createGroup(name) {
   const payload = await request('/api/presets', {
+    method: 'POST',
+    body: { action: 'createGroup', name },
+  })
+  return payload.group
+}
+
+export async function movePreset(presetId, groupId) {
+  return request('/api/presets', {
+    method: 'POST',
+    body: { action: 'move', presetId, groupId },
+  })
+}
+
+export async function deleteGroup(groupId) {
+  return request('/api/presets', {
+    method: 'POST',
+    body: { action: 'deleteGroup', groupId },
+  })
+}
+
+export async function importPreset(code) {
+  return request('/api/presets', {
     method: 'POST',
     body: { action: 'import', code },
   })
-  return payload.preset
 }
 
 export async function deletePreset(presetId) {
