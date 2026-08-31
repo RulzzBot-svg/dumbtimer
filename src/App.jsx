@@ -9,7 +9,7 @@ import { createPreset, fetchMe } from './lib/account.js'
 import { fetchAlarmGif } from './lib/media.js'
 import { isNativeApp } from './lib/native.js'
 import { listenForNativeAlarms, requestNativeNotificationAccess, syncNativeAlarms } from './lib/nativeNotifications.js'
-import { closePingNotification, showPingNotification } from './lib/notify.js'
+import { closePingNotification, PING_POPUP_MS, showPingNotification } from './lib/notify.js'
 import { deskPingerInstalled, writePingerSnapshot } from './lib/pinger.js'
 import {
   addMinutesHHmm,
@@ -211,6 +211,12 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [isRinging])
+
+  useEffect(() => {
+    if (!isRinging) return undefined
+    const timeout = window.setTimeout(() => dismissRef.current(), PING_POPUP_MS)
+    return () => window.clearTimeout(timeout)
+  }, [isRinging, activeAlarm?.id])
 
   async function fireAlarm(alarm, { persist }) {
     const activeCopy = COPY[modeRef.current]

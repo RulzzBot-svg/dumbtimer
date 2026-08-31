@@ -1,6 +1,8 @@
 const ICON_PATH = '/notify-icon.png'
+export const PING_POPUP_MS = 8000
 
 let lastNotification = null
+let closeTimer = null
 
 function iconUrl() {
   if (typeof window === 'undefined') return ICON_PATH
@@ -12,6 +14,10 @@ function notificationImage(media) {
 }
 
 export function closePingNotification() {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
   try {
     lastNotification?.close()
   } catch {
@@ -34,7 +40,7 @@ export function showPingNotification({ title, body, media, onClick }) {
     badge: iconUrl(),
     tag: 'desk-ping',
     renotify: true,
-    requireInteraction: true,
+    requireInteraction: false,
   }
   if (image) options.image = image
 
@@ -60,4 +66,6 @@ export function showPingNotification({ title, body, media, onClick }) {
     onClick?.()
     closePingNotification()
   }
+
+  closeTimer = setTimeout(() => closePingNotification(), PING_POPUP_MS)
 }

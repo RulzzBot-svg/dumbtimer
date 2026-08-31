@@ -1,6 +1,7 @@
 import { dateKey, nextAlarmWhen } from './schedule.js'
 
 const DEFAULT_ORIGIN = 'https://dumbtimer.vercel.app'
+const POPUP_MS = 8000
 const DESK_URLS = [
   'https://dumbtimer.vercel.app/*',
   'http://localhost:5173/*',
@@ -26,7 +27,12 @@ async function saveSnapshot(snapshot) {
 }
 
 async function scheduleAll(snapshot) {
-  await chrome.alarms.clearAll()
+  const existing = await chrome.alarms.getAll()
+  await Promise.all(
+    existing
+      .filter((item) => !item.name.startsWith('desk-clear-'))
+      .map((item) => chrome.alarms.clear(item.name)),
+  )
   const alarms = snapshot.alarms || []
   const now = new Date()
   for (const alarm of alarms) {
@@ -71,16 +77,18 @@ async function showToast(alarm) {
     title: alarm.query || 'Desk ping',
     message: `Desk · ${alarm.time}`,
     priority: 2,
-    requireInteraction: true,
+    requireInteraction: false,
   }
   if (image) options.imageUrl = image
+  const id = `desk-${alarm.id}`
   try {
-    await chrome.notifications.create(`desk-${alarm.id}`, options)
+    await chrome.notifications.create(id, options)
   } catch {
     delete options.imageUrl
     options.type = 'basic'
-    await chrome.notifications.create(`desk-${alarm.id}`, options)
+    await chrome.notifications.create(id, options)
   }
+  await chrome.alarms.create(`desk-clear-${id}`, { when: Date.now() + POPUP_MS })
 }
 
 async function openGifWindow(alarm) {
@@ -126,6 +134,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 })
 
 chrome.alarms.onAlarm.addListener(async (scheduled) => {
+  if (scheduled.name.startsWith('desk-clear-')) {
+    await chrome.notifications.clear(scheduled.name.slice('desk-clear-'.length))
+    return
+  }
   const snapshot = await loadState()
   const alarm = findAlarm(snapshot, scheduled.name)
   if (!alarm) return
