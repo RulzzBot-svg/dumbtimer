@@ -93,6 +93,7 @@ export default function App() {
   const [giphyKey, setGiphyKey] = useState(loadGiphyKey)
   const [showKey, setShowKey] = useState(false)
   const [isRinging, setIsRinging] = useState(false)
+  const [ringStartedAt, setRingStartedAt] = useState(0)
   const [activeAlarm, setActiveAlarm] = useState(null)
   const [media, setMedia] = useState(null)
   const [loadingGif, setLoadingGif] = useState(false)
@@ -216,12 +217,13 @@ export default function App() {
     if (!isRinging) return undefined
     const timeout = window.setTimeout(() => dismissRef.current(), PING_POPUP_MS)
     return () => window.clearTimeout(timeout)
-  }, [isRinging, activeAlarm?.id])
+  }, [isRinging, ringStartedAt])
 
   async function fireAlarm(alarm, { persist }) {
     const activeCopy = COPY[modeRef.current]
     ringingRef.current = true
     setIsRinging(true)
+    setRingStartedAt(Date.now())
     setActiveAlarm(alarm)
     setMedia(null)
     setLoadingGif(true)
