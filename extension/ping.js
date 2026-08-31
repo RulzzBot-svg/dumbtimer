@@ -12,3 +12,5 @@ else img.style.display = 'none'
 document.getElementById('open').addEventListener('click', () => {
   chrome.runtime.sendMessage({ type: 'desk:open' }, () => window.close())
 })
+
+window.setTimeout(() => window.close(), 8000)

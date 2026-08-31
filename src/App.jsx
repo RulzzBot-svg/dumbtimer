@@ -9,7 +9,7 @@ import { createPreset, fetchMe } from './lib/account.js'
 import { fetchAlarmGif } from './lib/media.js'
 import { isNativeApp } from './lib/native.js'
 import { listenForNativeAlarms, requestNativeNotificationAccess, syncNativeAlarms } from './lib/nativeNotifications.js'
-import { closePingNotification, showPingNotification } from './lib/notify.js'
+import { closePingNotification, PING_POPUP_MS, showPingNotification } from './lib/notify.js'
 import { deskPingerInstalled, writePingerSnapshot } from './lib/pinger.js'
 import {
   addMinutesHHmm,
@@ -93,6 +93,7 @@ export default function App() {
   const [giphyKey, setGiphyKey] = useState(loadGiphyKey)
   const [showKey, setShowKey] = useState(false)
   const [isRinging, setIsRinging] = useState(false)
+  const [ringStartedAt, setRingStartedAt] = useState(0)
   const [activeAlarm, setActiveAlarm] = useState(null)
   const [media, setMedia] = useState(null)
   const [loadingGif, setLoadingGif] = useState(false)
@@ -212,10 +213,17 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [isRinging])
 
+  useEffect(() => {
+    if (!isRinging) return undefined
+    const timeout = window.setTimeout(() => dismissRef.current(), PING_POPUP_MS)
+    return () => window.clearTimeout(timeout)
+  }, [isRinging, ringStartedAt])
+
   async function fireAlarm(alarm, { persist }) {
     const activeCopy = COPY[modeRef.current]
     ringingRef.current = true
     setIsRinging(true)
+    setRingStartedAt(Date.now())
     setActiveAlarm(alarm)
     setMedia(null)
     setLoadingGif(true)

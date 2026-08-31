@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Desk pinger",
   "short_name": "Desk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fire Desk GIF pings after you close the tab. Chrome must stay open. Click the icon for your name and ping count.",
   "homepage_url": "https://dumbtimer.vercel.app",
   "action": {
